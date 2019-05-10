@@ -15,8 +15,10 @@ import java.util.List;
 
 public class Serv {
 
-  public static final int PORT = 17777;
-  public static final String UTILITY_NAME = "serv";
+  private static final int DEFAULT_PORT = 17777;
+  private static final String UTILITY_NAME = "serv";
+  private static final String OPTION_PORT = "port";
+  private static final String OPTION_COMPRESS = "compress";
 
   public static void main(String[] args) throws Exception {
 
@@ -25,7 +27,7 @@ public class Serv {
     System.out.println("Starting " + task);
     //    System.exit(0);
     HttpServer server = HttpServer.create(new InetSocketAddress(task.servePort), 0);
-    server.createContext("/dl", new MyHandler());
+    server.createContext("/dl", new FileServeHandler(task.file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -33,11 +35,13 @@ public class Serv {
   private static Task parseTaskFromArgs(String[] args) {
     Options options = new Options();
 
-    Option port = new Option("p", "port", true, "port to serve on (default = " + PORT + ")");
+    Option port =
+        new Option("p", OPTION_PORT, true, "port to serve on (default = " + DEFAULT_PORT + ")");
     port.setRequired(false);
     options.addOption(port);
 
-    Option compress = new Option("C", "compress", false, "enable compression (default = false)");
+    Option compress =
+        new Option("C", OPTION_COMPRESS, false, "enable compression (default = false)");
     compress.setRequired(false);
     options.addOption(compress);
 
@@ -61,7 +65,10 @@ public class Serv {
       throw printHelpAndExit("File/folder doesn't exist", options);
     }
 
-    return new Task(file, Integer.parseInt(port.getValue("" + PORT)), compress.getValue() != null);
+    return new Task(
+        file,
+        Integer.parseInt(cmd.getOptionValue(OPTION_PORT, "" + DEFAULT_PORT)),
+        cmd.hasOption(OPTION_COMPRESS));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
@@ -72,7 +79,13 @@ public class Serv {
     return new IllegalStateException();
   }
 
-  static class MyHandler implements HttpHandler {
+  static class FileServeHandler implements HttpHandler {
+    private File file;
+
+    public FileServeHandler(File file) {
+      this.file = file;
+    }
+
     @Override
     public void handle(HttpExchange t) throws IOException {
       System.out.println(
@@ -84,8 +97,7 @@ public class Serv {
               + t.getRequestURI());
       t.sendResponseHeaders(200, 0);
       OutputStream os = t.getResponseBody();
-      //      os.write(response.getBytes());
-      Path path = new File("/home/xonix/Downloads/Site (2).pdf").toPath();
+      Path path = file.toPath();
       Files.copy(path, os);
       os.flush();
       os.close();
