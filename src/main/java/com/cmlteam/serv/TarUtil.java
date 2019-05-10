@@ -9,14 +9,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class TarUtil {
+class TarUtil {
 
   private TarUtil() {}
 
-  public static void compress(OutputStream outputStream, File... files) throws IOException {
+  static void compress(OutputStream outputStream, File folder) throws IOException {
     try (TarArchiveOutputStream out = getTarArchiveOutputStream(outputStream)) {
-      for (File file : files) {
-        addToArchiveCompression(out, file, ".");
+      File[] files = folder.listFiles();
+      if (files != null) {
+        for (File file : files) {
+          addToArchiveCompression(out, file, ".");
+        }
       }
     }
   }

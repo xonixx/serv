@@ -3,7 +3,7 @@ package com.cmlteam.serv;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class IpUtil {
+class IpUtil {
   private IpUtil() {}
 
   /** TODO can we make this more reliable? */

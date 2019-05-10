@@ -11,7 +11,7 @@ import java.nio.file.Path;
 class ServeHandlerFile extends ServeHandlerBase {
   private File file;
 
-  public ServeHandlerFile(File file) {
+  ServeHandlerFile(File file) {
     if (file.isDirectory())
       throw new IllegalArgumentException("Should be file, folder given: " + file);
     this.file = file;

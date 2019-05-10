@@ -28,13 +28,16 @@ public class Serv {
     File file = task.file;
     boolean isFolder = file.isDirectory();
 
-    System.out.println("To download the " + (isFolder ? "folder" : "file") + " please use: ");
-    System.out.println();
     if (isFolder) {
+      System.out.println("To download the files please use commands below. ");
+      System.out.println("NB! All files will be created in current folder.");
+      System.out.println();
       System.out.println("curl " + url + " | tar -xvf -");
       System.out.println(" -or-");
       System.out.println("wget -O- " + url + " | tar -xvf -");
     } else {
+      System.out.println("To download the file please use: ");
+      System.out.println();
       System.out.println("curl " + url + " > '" + file.getName() + "'");
       System.out.println(" -or-");
       System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
@@ -79,10 +82,6 @@ public class Serv {
     if (!file.exists()) {
       throw printHelpAndExit("File/folder doesn't exist", options);
     }
-
-    //    if (!file.isFile()) {
-    //      throw printHelpAndExit("Sorry, serving folder is not yet implemented", options);
-    //    }
 
     return new Task(
         file,

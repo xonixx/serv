@@ -9,7 +9,7 @@ import java.io.OutputStream;
 class ServeHandlerFolder extends ServeHandlerBase {
   private File folder;
 
-  public ServeHandlerFolder(File folder) {
+  ServeHandlerFolder(File folder) {
     if (!folder.isDirectory())
       throw new IllegalArgumentException("Should be folder, file given: " + folder);
     this.folder = folder;
