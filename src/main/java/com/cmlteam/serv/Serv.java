@@ -24,15 +24,25 @@ public class Serv {
 
     //    System.out.println("Starting " + task);
 
-    System.out.println("To download please use: ");
-    System.out.println();
     String url = "http://" + serveIp + ":" + task.servePort + "/dl";
-    System.out.println("curl " + url + " > '" + task.file.getName() + "'");
-    System.out.println(" -or-");
-    System.out.println("wget -O- " + url + " > '" + task.file.getName() + "'");
+    File file = task.file;
+    boolean isFolder = file.isDirectory();
+
+    System.out.println("To download the " + (isFolder ? "folder" : "file") + " please use: ");
+    System.out.println();
+    if (isFolder) {
+      System.out.println("curl " + url + " | tar -xvf -");
+      System.out.println(" -or-");
+      System.out.println("wget -O- " + url + " | tar -xvf -");
+    } else {
+      System.out.println("curl " + url + " > '" + file.getName() + "'");
+      System.out.println(" -or-");
+      System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
+    }
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, task.servePort), 0);
-    server.createContext("/dl", new FileServeHandler(task.file));
+    server.createContext(
+        "/dl", isFolder ? new ServeHandlerFolder(file) : new ServeHandlerFile(file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -70,9 +80,9 @@ public class Serv {
       throw printHelpAndExit("File/folder doesn't exist", options);
     }
 
-    if (!file.isFile()) {
-      throw printHelpAndExit("Sorry, serving folder is not yet implemented", options);
-    }
+    //    if (!file.isFile()) {
+    //      throw printHelpAndExit("Sorry, serving folder is not yet implemented", options);
+    //    }
 
     return new Task(
         file,
