@@ -2,6 +2,7 @@ package com.cmlteam.serv;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.File;
@@ -13,8 +14,9 @@ class TarUtil {
 
   private TarUtil() {}
 
-  static void compress(OutputStream outputStream, File folder) throws IOException {
-    try (TarArchiveOutputStream out = getTarArchiveOutputStream(outputStream)) {
+  static void compress(OutputStream outputStream, File folder, boolean compress)
+      throws IOException {
+    try (TarArchiveOutputStream out = getTarArchiveOutputStream(outputStream, compress)) {
       File[] files = folder.listFiles();
       if (files != null) {
         for (File file : files) {
@@ -24,8 +26,11 @@ class TarUtil {
     }
   }
 
-  private static TarArchiveOutputStream getTarArchiveOutputStream(OutputStream outputStream)
-      throws IOException {
+  private static TarArchiveOutputStream getTarArchiveOutputStream(
+      OutputStream outputStream, boolean compress) throws IOException {
+    if (compress) {
+      outputStream = new GzipCompressorOutputStream(outputStream);
+    }
     TarArchiveOutputStream taos = new TarArchiveOutputStream(outputStream);
     // TAR has an 8 gig file limit by default, this gets around that
     taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);

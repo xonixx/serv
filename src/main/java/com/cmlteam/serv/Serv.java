@@ -27,14 +27,16 @@ public class Serv {
     String url = "http://" + serveIp + ":" + task.servePort + "/dl";
     File file = task.file;
     boolean isFolder = file.isDirectory();
+    boolean isCompress = task.compress;
 
     if (isFolder) {
       System.out.println("To download the files please use commands below. ");
-      System.out.println("NB! All files will be created in current folder.");
+      System.out.println("NB! All files will be placed into current folder!");
       System.out.println();
-      System.out.println("curl " + url + " | tar -xvf -");
+      String extractPart = " | tar -x" + (isCompress ? "z" : "") + "vf -";
+      System.out.println("curl " + url + extractPart);
       System.out.println(" -or-");
-      System.out.println("wget -O- " + url + " | tar -xvf -");
+      System.out.println("wget -O- " + url + extractPart);
     } else {
       System.out.println("To download the file please use: ");
       System.out.println();
@@ -45,7 +47,10 @@ public class Serv {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, task.servePort), 0);
     server.createContext(
-        "/dl", isFolder ? new ServeHandlerFolder(file) : new ServeHandlerFile(file));
+        "/dl",
+        isFolder
+            ? new HttpHandlerServeFolderTar(file, isCompress)
+            : new HttpHandlerServeFile(file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
