@@ -1,16 +1,10 @@
 package com.cmlteam.serv;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.cli.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class Serv {
@@ -24,9 +18,20 @@ public class Serv {
 
     Task task = parseTaskFromArgs(args);
 
-    System.out.println("Starting " + task);
     //    System.exit(0);
-    HttpServer server = HttpServer.create(new InetSocketAddress(task.servePort), 0);
+
+    String serveIp = IpUtil.getLocalNetworkIp();
+
+    //    System.out.println("Starting " + task);
+
+    System.out.println("To download please use: ");
+    System.out.println();
+    String url = "http://" + serveIp + ":" + task.servePort + "/dl";
+    System.out.println("curl " + url + " > '" + task.file.getName() + "'");
+    System.out.println(" -or-");
+    System.out.println("wget -O- " + url + " > '" + task.file.getName() + "'");
+
+    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, task.servePort), 0);
     server.createContext("/dl", new FileServeHandler(task.file));
     server.setExecutor(null); // creates a default executor
     server.start();
@@ -65,6 +70,10 @@ public class Serv {
       throw printHelpAndExit("File/folder doesn't exist", options);
     }
 
+    if (!file.isFile()) {
+      throw printHelpAndExit("Sorry, serving folder is not yet implemented", options);
+    }
+
     return new Task(
         file,
         Integer.parseInt(cmd.getOptionValue(OPTION_PORT, "" + DEFAULT_PORT)),
@@ -77,30 +86,5 @@ public class Serv {
     formatter.printHelp(UTILITY_NAME, options);
     System.exit(1);
     return new IllegalStateException();
-  }
-
-  static class FileServeHandler implements HttpHandler {
-    private File file;
-
-    public FileServeHandler(File file) {
-      this.file = file;
-    }
-
-    @Override
-    public void handle(HttpExchange t) throws IOException {
-      System.out.println(
-          "["
-              + t.getRemoteAddress().getAddress()
-              + "] "
-              + t.getRequestMethod()
-              + " "
-              + t.getRequestURI());
-      t.sendResponseHeaders(200, 0);
-      OutputStream os = t.getResponseBody();
-      Path path = file.toPath();
-      Files.copy(path, os);
-      os.flush();
-      os.close();
-    }
   }
 }
