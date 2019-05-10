@@ -9,7 +9,7 @@ UPX=~/soft/upx-3.95-amd64_linux
 mvn clean compile
 CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
 
-cd target/classes
+cd ./build/
 
 echo
 echo Graal
