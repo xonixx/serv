@@ -7,7 +7,7 @@ public class Task {
   final int servePort;
   final boolean compress;
 
-  public Task(File file, int servePort, boolean compress) {
+  Task(File file, int servePort, boolean compress) {
     this.file = file;
     this.servePort = servePort;
     this.compress = compress;
