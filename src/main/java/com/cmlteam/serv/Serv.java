@@ -11,19 +11,12 @@ public class Serv {
 
   private static final String VERSION = "0.1";
   private static final int DEFAULT_PORT = 17777;
-  private static final String UTILITY_HELP_LINE = "serv [...options] <file or folder>";
-  private static final String OPTION_PORT = "port";
-  private static final String OPTION_COMPRESS = "compress";
-  private static final String OPTION_VERSION = "version";
+  private static final String UTILITY_NAME = "serv";
+  private static final String UTILITY_HELP_LINE = UTILITY_NAME + " [...options] <file or folder>";
 
   public static void main(String[] args) throws Exception {
 
     Command command = parseCommandFromArgs(args);
-
-    if (command.isVersion) {
-      System.out.println(VERSION);
-      System.exit(0);
-    }
 
     String serveIp = IpUtil.getLocalNetworkIp();
     String url = "http://" + serveIp + ":" + command.servePort + "/dl";
@@ -61,18 +54,21 @@ public class Serv {
     Options options = new Options();
 
     Option port =
-        new Option("p", OPTION_PORT, true, "port to serve on (default = " + DEFAULT_PORT + ")");
+        new Option("p", "port", true, "port to serve on (default = " + DEFAULT_PORT + ")");
     port.setRequired(false);
     options.addOption(port);
 
-    Option compress =
-        new Option("C", OPTION_COMPRESS, false, "enable compression (default = false)");
+    Option compress = new Option("C", "compress", false, "enable compression (default = false)");
     compress.setRequired(false);
     options.addOption(compress);
 
-    Option version = new Option("v", OPTION_VERSION, false, "show version and exit");
+    Option version = new Option("v", "version", false, "show version and exit");
     compress.setRequired(false);
     options.addOption(version);
+
+    Option help = new Option("h", "help", false, "print help and exit");
+    compress.setRequired(false);
+    options.addOption(help);
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -81,6 +77,18 @@ public class Serv {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
       throw printHelpAndExit(e.getMessage(), options);
+    }
+
+    if (cmd.hasOption(help.getLongOpt())) {
+      System.out.println(UTILITY_NAME + " ver. " + VERSION);
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp(UTILITY_HELP_LINE, options);
+      System.exit(0);
+    }
+
+    if (cmd.hasOption(version.getLongOpt())) {
+      System.out.println(VERSION);
+      System.exit(0);
     }
 
     List<String> argList = cmd.getArgList();
@@ -96,9 +104,8 @@ public class Serv {
 
     return new Command(
         file,
-        Integer.parseInt(cmd.getOptionValue(OPTION_PORT, "" + DEFAULT_PORT)),
-        cmd.hasOption(OPTION_COMPRESS),
-        cmd.hasOption(OPTION_VERSION));
+        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)),
+        cmd.hasOption(compress.getLongOpt()));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
