@@ -45,7 +45,7 @@ public class Serv {
         "/dl",
         isFolder
             ? new HttpHandlerServeFolderTar(file, isCompress)
-            : new HttpHandlerServeFile(file));
+            : new HttpHandlerServeFile(file, isCompress));
     server.setExecutor(null); // creates a default executor
     server.start();
   }

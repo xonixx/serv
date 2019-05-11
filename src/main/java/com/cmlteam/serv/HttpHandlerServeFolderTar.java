@@ -8,12 +8,12 @@ import java.io.OutputStream;
 
 class HttpHandlerServeFolderTar extends HttpHandlerBase {
   private File folder;
-  private boolean compress;
+  private boolean isCompress;
 
-  HttpHandlerServeFolderTar(File folder, boolean compress) {
+  HttpHandlerServeFolderTar(File folder, boolean isCompress) {
     if (!folder.isDirectory())
       throw new IllegalArgumentException("Should be folder, file given: " + folder);
-    this.compress = compress;
+    this.isCompress = isCompress;
     this.folder = folder;
   }
 
@@ -22,7 +22,7 @@ class HttpHandlerServeFolderTar extends HttpHandlerBase {
     log(httpExchange);
     httpExchange.sendResponseHeaders(200, 0);
     OutputStream os = httpExchange.getResponseBody();
-    TarUtil.compress(os, folder, compress);
+    TarUtil.compress(os, folder, isCompress);
     os.flush();
     os.close();
   }
