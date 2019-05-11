@@ -9,43 +9,45 @@ import java.util.List;
 
 public class Serv {
 
+  private static final String VERSION = "0.1";
   private static final int DEFAULT_PORT = 17777;
-  private static final String UTILITY_NAME = "serv";
+  private static final String UTILITY_HELP_LINE = "serv [...options] <file or folder>";
   private static final String OPTION_PORT = "port";
   private static final String OPTION_COMPRESS = "compress";
+  private static final String OPTION_VERSION = "version";
 
   public static void main(String[] args) throws Exception {
 
-    Task task = parseTaskFromArgs(args);
+    Command command = parseCommandFromArgs(args);
 
-    //    System.exit(0);
+    if (command.isVersion) {
+      System.out.println(VERSION);
+      System.exit(0);
+    }
 
     String serveIp = IpUtil.getLocalNetworkIp();
-
-    //    System.out.println("Starting " + task);
-
-    String url = "http://" + serveIp + ":" + task.servePort + "/dl";
-    File file = task.file;
+    String url = "http://" + serveIp + ":" + command.servePort + "/dl";
+    File file = command.file;
     boolean isFolder = file.isDirectory();
-    boolean isCompress = task.compress;
+    boolean isCompress = command.isCompress;
 
     if (isFolder) {
-      System.out.println("To download the files please use commands below. ");
+      System.out.println("To download the files please use one of the commands below. ");
       System.out.println("NB! All files will be placed into current folder!");
       System.out.println();
       String extractPart = " | tar -x" + (isCompress ? "z" : "") + "vf -";
       System.out.println("curl " + url + extractPart);
-      System.out.println(" -or-");
+      System.out.println("-or-");
       System.out.println("wget -O- " + url + extractPart);
     } else {
       System.out.println("To download the file please use: ");
       System.out.println();
       System.out.println("curl " + url + " > '" + file.getName() + "'");
-      System.out.println(" -or-");
+      System.out.println("-or-");
       System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
     }
 
-    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, task.servePort), 0);
+    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext(
         "/dl",
         isFolder
@@ -55,7 +57,7 @@ public class Serv {
     server.start();
   }
 
-  private static Task parseTaskFromArgs(String[] args) {
+  private static Command parseCommandFromArgs(String[] args) {
     Options options = new Options();
 
     Option port =
@@ -67,6 +69,10 @@ public class Serv {
         new Option("C", OPTION_COMPRESS, false, "enable compression (default = false)");
     compress.setRequired(false);
     options.addOption(compress);
+
+    Option version = new Option("v", OPTION_VERSION, false, "show version and exit");
+    compress.setRequired(false);
+    options.addOption(version);
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -88,16 +94,19 @@ public class Serv {
       throw printHelpAndExit("File/folder doesn't exist", options);
     }
 
-    return new Task(
+    return new Command(
         file,
         Integer.parseInt(cmd.getOptionValue(OPTION_PORT, "" + DEFAULT_PORT)),
-        cmd.hasOption(OPTION_COMPRESS));
+        cmd.hasOption(OPTION_COMPRESS),
+        cmd.hasOption(OPTION_VERSION));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
-    if (message != null) System.err.println(message);
+    if (message != null) {
+      System.err.println(message);
+    }
     HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp(UTILITY_NAME, options);
+    formatter.printHelp(UTILITY_HELP_LINE, options);
     System.exit(1);
     return new IllegalStateException();
   }
