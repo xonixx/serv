@@ -23,10 +23,10 @@ class HttpHandlerServeFile extends HttpHandlerBase {
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
     log(httpExchange);
-    httpExchange.sendResponseHeaders(200, 0);
     if (isCompress) {
       httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
     }
+    httpExchange.sendResponseHeaders(200, 0);
     OutputStream outputStream = httpExchange.getResponseBody();
     Path path = file.toPath();
     if (isCompress) {

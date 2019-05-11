@@ -35,9 +35,11 @@ public class Serv {
     } else {
       System.out.println("To download the file please use: ");
       System.out.println();
-      System.out.println("curl " + url + " > '" + file.getName() + "'");
+      System.out.println(
+          "curl " + url + (isCompress ? " --compressed" : "") + " > '" + file.getName() + "'");
       System.out.println("-or-");
-      System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
+      System.out.println(
+          "wget -O- " + url + (isCompress ? " | gunzip " : "") + " > '" + file.getName() + "'");
     }
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
