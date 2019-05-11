@@ -11,18 +11,17 @@ import java.nio.file.Path;
 
 class HttpHandlerServeFile extends HttpHandlerBase {
   private File file;
-  private boolean isCompress;
 
-  HttpHandlerServeFile(File file, boolean isCompress) {
+  HttpHandlerServeFile(File file) {
     if (file.isDirectory())
       throw new IllegalArgumentException("Should be file, folder given: " + file);
     this.file = file;
-    this.isCompress = isCompress;
   }
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
     log(httpExchange);
+    boolean isCompress = isCompressed(httpExchange);
     if (isCompress) {
       httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
     }

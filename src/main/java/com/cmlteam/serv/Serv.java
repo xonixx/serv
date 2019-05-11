@@ -49,15 +49,7 @@ public class Serv {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext(
-        "/dl",
-        isFolder
-            ? new HttpHandlerServeFolderTar(file, false)
-            : new HttpHandlerServeFile(file, false));
-    server.createContext(
-        "/dl?z",
-        isFolder
-            ? new HttpHandlerServeFolderTar(file, true)
-            : new HttpHandlerServeFile(file, true));
+        "/dl", isFolder ? new HttpHandlerServeFolderTar(file) : new HttpHandlerServeFile(file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }

@@ -13,4 +13,9 @@ abstract class HttpHandlerBase implements HttpHandler {
             + " "
             + httpExchange.getRequestURI());
   }
+
+  boolean isCompressed(HttpExchange httpExchange) {
+    String requestURI = httpExchange.getRequestURI().toString();
+    return requestURI.endsWith("?z");
+  }
 }
