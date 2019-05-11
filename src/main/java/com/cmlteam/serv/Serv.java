@@ -20,34 +20,44 @@ public class Serv {
 
     String serveIp = IpUtil.getLocalNetworkIp();
     String url = "http://" + serveIp + ":" + command.servePort + "/dl";
+    String urlZ = url + "?z";
     File file = command.file;
     boolean isFolder = file.isDirectory();
-    boolean isCompress = command.isCompress;
 
     if (isFolder) {
       System.out.println("To download the files please use one of the commands below. ");
       System.out.println("NB! All files will be placed into current folder!");
       System.out.println();
-      String extractPart = " | tar -x" + (isCompress ? "z" : "") + "vf -";
+
+      String extractPart = " | tar -xvf -";
       System.out.println("curl " + url + extractPart);
-      System.out.println("-or-");
       System.out.println("wget -O- " + url + extractPart);
+
+      String extractPartZ = " | tar -xzvf -";
+      System.out.println("curl " + urlZ + extractPartZ);
+      System.out.println("wget -O- " + urlZ + extractPartZ);
     } else {
-      System.out.println("To download the file please use: ");
+      System.out.println("To download the file please use one of the commands below: ");
       System.out.println();
-      System.out.println(
-          "curl " + url + (isCompress ? " --compressed" : "") + " > '" + file.getName() + "'");
-      System.out.println("-or-");
-      System.out.println(
-          "wget -O- " + url + (isCompress ? " | gunzip " : "") + " > '" + file.getName() + "'");
+
+      System.out.println("curl " + url + " > '" + file.getName() + "'");
+      System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
+
+      System.out.println("curl " + urlZ + " --compressed > '" + file.getName() + "'");
+      System.out.println("wget -O- " + urlZ + " | gunzip > '" + file.getName() + "'");
     }
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext(
         "/dl",
         isFolder
-            ? new HttpHandlerServeFolderTar(file, isCompress)
-            : new HttpHandlerServeFile(file, isCompress));
+            ? new HttpHandlerServeFolderTar(file, false)
+            : new HttpHandlerServeFile(file, false));
+    server.createContext(
+        "/dl?z",
+        isFolder
+            ? new HttpHandlerServeFolderTar(file, true)
+            : new HttpHandlerServeFile(file, true));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -60,16 +70,12 @@ public class Serv {
     port.setRequired(false);
     options.addOption(port);
 
-    Option compress = new Option("C", "compress", false, "enable compression (default = false)");
-    compress.setRequired(false);
-    options.addOption(compress);
-
     Option version = new Option("v", "version", false, "show version and exit");
-    compress.setRequired(false);
+    version.setRequired(false);
     options.addOption(version);
 
     Option help = new Option("h", "help", false, "print help and exit");
-    compress.setRequired(false);
+    help.setRequired(false);
     options.addOption(help);
 
     CommandLineParser parser = new DefaultParser();
@@ -105,9 +111,7 @@ public class Serv {
     }
 
     return new Command(
-        file,
-        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)),
-        cmd.hasOption(compress.getLongOpt()));
+        file, Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
