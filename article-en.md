@@ -2,9 +2,9 @@
 
 ## Formulation of the problem
 
-Periodically, I have the task to share files over a local network, for example, with a project colleague.
+Periodically I need to share files over a local network, for example, with a project colleague.
 
-There can be a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira, or even send as email.
+There are a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira, or even send as email.
 
 But all this is to some extent inflexible, sometimes it requires preliminary setup and has its limitations (for example, the maximum size of the attachment).
 
@@ -19,7 +19,7 @@ $ python3 -mhttp.server
 Serving HTTP on 0.0.0.0 port 8000 ...
 ```
 
-This command starts the web server in the current folder and allows you to get a list of files through the web interface and download them. More similar tricks can be found here: https://gist.github.com/willurd/5720255.
+This command starts the web server in the current folder and allows you to get a list of files through the web interface and download them. You can find more similar tricks here: https://gist.github.com/willurd/5720255.
 
 There are several inconveniences though. Now to transfer the download link to your colleague, you need to know your IP address on the network.
 
@@ -32,7 +32,7 @@ And then from the received list of network interfaces, select the appropriate on
 
 The second inconvenience: this server is single threaded. This means that while one of your colleagues is downloading the file, the other one will not even be able to see the list of files.
 
-Thirdly - it is inflexible. If you need to transfer only one file, it will be unnecessary to open the entire folder, i.e. you will have to perform such gestures (and don't forget to cleaning the garbage afterwards):
+Thirdly - it is inflexible. If you need to transfer only one file, it will be unnecessary to open the entire folder, i.e. you will have to perform such gestures (and don't forget to clean up the garbage afterwards):
 
 ```bash
 $ mkdir tmp1
@@ -58,10 +58,10 @@ Is it possible to achieve all of the above, but without the described problems?
 
 So, it's time to formalize what we will build:
 1. A program that is easy to install (static binary)
-1. Which will allow to transfer both the file and the folder with all contents
+1. Which allows to transfer both the file and the folder with all contents
 1. With optional compression
-1. Which will allow the receiving party to download the file(s) using only standard *nix tools (wget/curl/tar)
-1. After launch, the program will immediately issue exact commands for downloading.
+1. Which allows the receiving party to download the file(s) using only standard *nix tools (wget/curl/tar)
+1. After launch, the program immediately issues exact commands for downloading.
 
 ## Solution
 
@@ -70,9 +70,9 @@ At the [JEEConf](https://jeeconf.com/) conference, which I attended not so long 
 For those who are not yet in context (do these people exist? oO) let me remind you that GraalVM is a pumped-up JVM from Oracle with additional features, the most notable of which are:
 1. Polyglot JVM - the ability to seamlessly launch Java, Javascript, Python, Ruby, R, etc. code
 1. Support AOT compilation - compiling Java directly into a native binary
-1. A less noticeable, but very cool feature - the C2 compiler has been rewritten from C++ to Java for the purpose of more convenient further development. This has already produced noticeable results. This compiler makes much more optimizations at the stage of converting Java bytecode to native code. For example, it is able to remove allocations more effectively. Twitter was able to reduce CPU consumption by 11% simply by turning on this setting, which in their scale gave a noticeable saving of resources (and money).
+1. A less noticeable, but very cool feature - the C2 compiler has been rewritten from C++ to Java for the purpose of more convenient further development. This has already produced noticeable results. This compiler makes much more optimizations at the stage of converting Java bytecode to native code. For example, it is able to remove allocations more efficiently. Twitter was able to reduce CPU consumption by 11% simply by turning on this setting, which in their scale gave a noticeable saving of resources (and money).
 
-You can refresh the idea of ​​Graal, for example, [in this article](https://chrisseaton.com/truffleruby/tenthings/).
+You can refresh your knowledge of ​​Graal for example [in this article](https://chrisseaton.com/truffleruby/tenthings/).
 
 We will write in Java, so for us the most relevant feature will be an AOT compilation.
 
@@ -105,7 +105,7 @@ wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
 Yes, that simple!
 
-Please note - the program itself determines the correct IP address on which files will be available for download.
+Please note - the program itself determines the correct IP address on which files will be served for download.
 
 ## Observations / Reflections
 
@@ -118,7 +118,7 @@ $ du -hs `which serv`
 
 Incredibly, the entire JVM, along with the application code, fit in just a few megabytes! Of course, everything is somewhat more complex, but more on that later.
 
-In fact, the Graal compiler produces a binary of slightly more than 7 megabytes. I decided to additionally [compress it with UPX](https://github.com/upx/upx).
+In fact, the Graal compiler produces a binary of slightly more than 7 megs. I decided to additionally [compress it with UPX](https://github.com/upx/upx).
 
 This turned out to be a good idea, since the launch time increase was rather small:
 
