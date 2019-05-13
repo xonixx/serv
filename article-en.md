@@ -14,7 +14,7 @@ I was always pleasantly surprised by the opportunity in Linux, using available t
 
 Say, I often solved the above mentioned problem using the system python with the following one-liner
 
-``` bash
+```bash
 $ python3 -mhttp.server
 Serving HTTP on 0.0.0.0 port 8000 ...
 ```
@@ -25,8 +25,8 @@ There are several inconveniences. Now to transfer the download link to your coll
 
 For this it is convenient to use the command
 
-``` bash
-$ ifconfig -a
+```bash
+$ ifconfig -a 
 ```
 And then from the received list of network interfaces, select the appropriate one and manually compile a link like http: // IP: 8000, which you should send.
 
@@ -34,7 +34,7 @@ The second inconvenience: this server is single threaded. This means that while 
 
 Thirdly - it is inflexible. If you need to transfer only one file, it will be unnecessary to open the entire folder, i.e. will have to perform such gestures (and after still cleaning the garbage):
 
-``` bash
+```bash
 $ mkdir tmp1
 $ cp file.zip tmp1
 $ cd tmp1
@@ -46,8 +46,8 @@ The fourth inconvenience - there is no _simple_ way to download the entire conte
 To transfer the contents of the folder is usually used a technique called [tar pipe](https://docstore.mik.ua/orelly/unix3/upt/ch10_13.htm).
 
 Do something like this:
-``` bash
-$ ssh user @ host 'cd / path / to / source && tar cf -.' | cd / path / to / destination && tar xvf -
+```bash
+$ ssh user@host 'cd /path/to/source && tar cf - .' | cd /path/to/destination && tar xvf -
 ```
 
 If suddenly it is not clear, I will explain how it works. The first part of the `tar cf - .` command will compile an archive of the contents of the current folder and write to standard output. Then this output through the pipe is transmitted via a secure ssh channel to the input of a similar command `tar xvf -` which does the reverse procedure, i.e. reads standard input and unzips to current folder. In fact, there is a transfer of archive files, but without creating an intermediate file!
@@ -60,12 +60,12 @@ So, it's time to formalize what we will build:
 1. A program that is easy to install (static binary)
 1. Which will allow to transfer both the file and the folder with all contents
 1. With optional compression
-1. Which will allow the receiving party to download the file (s) using only standard * nix tools (wget / curl / tar)
+1. Which will allow the receiving party to download the file(s) using only standard *nix tools (wget/curl/tar)
 1. After launch, the program will immediately issue exact commands for downloading.
 
-## Decision
+## Solution
 
-At the [JEEConf](https://jeeconf.com/) conference , which I attended not so long ago, the [Graal](https://www.graalvm.org/) topic was raised repeatedly. The topic is far from new, but for me it was a trigger to finally touch this beast with my own hand.
+At the [JEEConf](https://jeeconf.com/) conference, which I attended not so long ago, the [Graal](https://www.graalvm.org/) topic was raised repeatedly. The topic is far from new, but for me it was a trigger to finally touch this beast with my own hand.
 
 For those who are not yet in the subject line (are there really any such? OO) let me remind you that GraalVM is such a pumped-up JVM from Oracle with additional features, the most notable of which are:
 1. Polyglot JVM - the ability to seamlessly launch Java, Javascript, Python, Ruby, R, etc. code
@@ -80,22 +80,22 @@ Actually, the result of the development is presented [in this Github repository]
 
 An example of using to transfer a single file:
 
-``` bash
-$ serv '/path/to/report.pdf'
-To download the file please use one of the commands below:
+```bash
+$ serv '/path/to/report.pdf' 
+To download the file please use one of the commands below: 
 
-curl http://192.168.0.179:17777/dl> 'report.pdf'
-wget -O- http://192.168.0.179:17777/dl> 'report.pdf'
-curl http://192.168.0.179:17777/dl?z --compressed> 'report.pdf'
-wget -O- http://192.168.0.179:17777/dl?z | gunzip> 'report.pdf'
+curl http://192.168.0.179:17777/dl > 'report.pdf'
+wget -O- http://192.168.0.179:17777/dl > 'report.pdf'
+curl http://192.168.0.179:17777/dl?z --compressed > 'report.pdf'
+wget -O- http://192.168.0.179:17777/dl?z | gunzip > 'report.pdf'
 ```
 
 An example of use when transferring the contents of a folder (all files including nested!):
 
-``` bash
-$ serv '/ path / to / folder'
-To download the files please use one of the commands below.
-NB! All files will be placed into the current folder!
+```bash
+$ serv '/path/to/folder' 
+To download the files please use one of the commands below. 
+NB! All files will be placed into current folder!
 
 curl http://192.168.0.179:17777/dl | tar -xvf -
 wget -O- http://192.168.0.179:17777/dl | tar -xvf -
@@ -111,9 +111,9 @@ Please note - the program itself determines the correct IP address on which file
 
 It is clear that one of the goals in creating the program was its compactness. And here is the result achieved:
 
-``` bash
+```bash
 $ du -hs `which serv`
-2.4M / usr / local / bin / serv
+2.4M	/usr/local/bin/serv 
 ```
 
 Incredibly, the entire JVM, along with the application code, fit in a measly few megabytes! Of course, everything is somewhat wrong, but more on that later.
@@ -123,33 +123,33 @@ In fact, the Graal compiler produces a binary of slightly more than 7 megabytes.
 This turned out to be a good idea, since the launch time was very inconsequential at the same time:
 
 Uncompressed version:
-``` bash
+```bash
 $ time ./build/com.cmlteam.serv.serv -v
 0.1
 
-real 0m0.001s
-user 0m0.001s
-sys 0m0.000s
+real    0m0.001s
+user    0m0.001s
+sys     0m0.000s
 ```
 
 Compressed:
-``` bash
+```bash
 $ time ./build/serv -v
 0.1
 
-real 0m0.021s
-user 0m0.021s
-sys 0m0.000s
+real    0m0.021s
+user    0m0.021s
+sys     0m0.000s
 ```
 
 For comparison, the launch time "in the traditional way":
-``` bash
-$ time java -cp "/home/xonix/proj/serv/target/classes:/home/xonix/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar:/home/ xonix / .m2 / repository / org / apache / commons / commons-compress / 1.18 / commons-compress-1.18.jar "com.cmlteam.serv.Serv -v
+```bash
+$ time java -cp "/home/xonix/proj/serv/target/classes:/home/xonix/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar:/home/xonix/.m2/repository/org/apache/commons/commons-compress/1.18/commons-compress-1.18.jar" com.cmlteam.serv.Serv -v
 0.1
 
-real 0m0.040s
-user 0m0.030s
-sys 0m0.019s
+real    0m0.040s
+user    0m0.030s
+sys     0m0.019s
 ```
 
 As you can see, two times slower than the UPX-version.
