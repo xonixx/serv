@@ -4,7 +4,7 @@
 
 From time to time I need to share files over a local network for instance with a project colleague.
 
-There are a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira, or even send as email.
+There are a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira or even send as email.
 
 But all this is to some extent inflexible, sometimes it requires preliminary setup and has its limitations (for example the maximum size of the attachment).
 
@@ -12,7 +12,7 @@ And you want something more lightweight and flexible.
 
 I always admired Linux for letting me quickly build a practical solution using only built-in tools.
 
-Say, I often solved the problem mentioned above using the system python with the following one-liner
+Say, I often solved the problem mentioned above using the system python with the following one-liner:
 
 ```bash
 $ python3 -mhttp.server
@@ -21,16 +21,16 @@ Serving HTTP on 0.0.0.0 port 8000 ...
 
 This command starts the web server in the current folder and allows you to get a list of files through the web interface and download them. You can find more similar tricks here: https://gist.github.com/willurd/5720255.
 
-There are several inconveniences though. Now to transfer the download link to your colleague, you need to know your network IP address.
+There are several inconveniences though. Now to transfer the download link to your colleague you need to know your network IP address.
 
 For this you can just do:
 
 ```bash
 $ ifconfig -a 
 ```
-And then from the received list of network interfaces select the appropriate one and manually compile a link like http://IP:8000. Now send it to your colleague.
+And then from the received list of network interfaces select the appropriate one and manually compile a link like http://IP:8000. Now it's ready to be shared.
 
-The second inconvenience: this server is single threaded. Thus while one of your colleagues is downloading the file the other one will not even be able to see the list of files.
+The second inconvenience - this server is single threaded. Thus while one of your colleagues is downloading the file the other one will not even be able to see the list of files.
 
 Thirdly - it is inflexible. If you need to transfer only one file it will be unnecessary to open the entire folder i.e. you will have to perform such gestures (and don't forget to clean up the garbage afterwards):
 
@@ -54,14 +54,14 @@ No worry if it's not clear, I will explain how it works. The first part of the `
 
 Obviously this approach is "slightly" inconvenience. You need to have ssh access from one machine to another which generally is almost never set up.
 
-Is it possible to achieve same functionality but without the problems described?
+Is it possible to achieve the same functionality but without the problems described?
 
 Finally let's formalize what we are going to build:
 1. A program that is easy to install (static binary)
-1. Able to transfer both the file and the folder with all contents
+1. Which is able to transfer both the file and the folder with all contents
 1. With optional compression
 1. Which allows the receiving party to download the file(s) using only standard *nix tools (wget/curl/tar)
-1. After launch the program immediately shows the exact commands for downloading.
+1. After launch the program immediately reveals the exact commands for downloading
 
 ## Solution
 
@@ -105,7 +105,7 @@ wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
 Yes, that simple!
 
-Please note that the program itself determines the correct IP address serving the files.
+Please note that the program itself determines the correct IP address that serves the files.
 
 ## Observations / Reflections
 
@@ -118,7 +118,7 @@ $ du -hs `which serv`
 
 Incredibly, the entire JVM along with the application code fits in just a few megabytes! Of course, everything is somewhat more complex, but more on that later.
 
-In fact the Graal compiler produces a binary of slightly more than 7 megs. Additionally I decided [compress it with UPX](https://github.com/upx/upx).
+In fact the Graal compiler produces a binary of slightly more than 7 megs. Additionally I decided to [compress it with UPX](https://github.com/upx/upx).
 
 This turned out to be a good idea since the launch time increase was rather small.
 
@@ -170,8 +170,8 @@ Compiling into native code on Graal is performed by the [native-image](https://w
 
 ## Findings
 
-I think the experiment turned out to be very successful. During the development using the Graal toolkit I didn't encounter any significant problems. Everything worked predictably and consistently. Although it can be not so smooth if you try to do something more complex, for example [Spring Boot app](https://royvanrijn.com/blog/2018/09/part-2-native-microservice-in-graalvm/). Nevertheless, a number of platforms has already been presented that claim to support Graal natively. Among them are [Micronaut](https://micronaut.io/), [Microprofile](https://microprofile.io/), [Quarkus](https://quarkus.io/).
+I think the experiment turned out to be very successful. During the development using the Graal toolkit I didn't encounter any significant problems. Everything worked predictably and consistently. Although it can be not so smooth if you try to do something more complex, for example [a Spring Boot app](https://royvanrijn.com/blog/2018/09/part-2-native-microservice-in-graalvm/). Nevertheless, a number of platforms has already been presented that claim to support Graal natively. Among them are [Micronaut](https://micronaut.io/), [Microprofile](https://microprofile.io/), [Quarkus](https://quarkus.io/).
 
-As for the further development of the project the [list of improvements](https://github.com/xonixx/serv/issues) is already planned for version 0.2. Also at the moment only building of the binary for Linux x64 is implemented. I hope that this will improve especially since the Graal compiler supports MacOS and Windows. Unfortunately it does not yet support cross-compilation that could really help here.
+As for the further development of the project the [list of improvements](https://github.com/xonixx/serv/issues) is already planned for version 0.2. Also, at the moment only building of the binary for Linux x64 is implemented. I hope that this will improve especially since the Graal compiler supports MacOS and Windows. Unfortunately it doesn't yet support cross-compilation that could really help here.
 
 I hope that the presented utility will be useful at least to someone from the respected community. I would be glad twice if there are those who want to contribute [into the project](https://github.com/xonixx/serv).
