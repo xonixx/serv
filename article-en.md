@@ -1,6 +1,6 @@
 # Develop a utility on GraalVM
 
-## Formulation of the problem
+## Problem definition
 
 Periodically I need to share files over a local network, for example, with a project colleague.
 
@@ -10,9 +10,9 @@ But all this is to some extent inflexible, sometimes it requires preliminary set
 
 And you want something more lightweight and flexible.
 
-I was always pleasantly surprised by the opportunity in Linux, using available tools, to quickly build a practical solution.
+I always admired Linux for letting me quickly build a practical solution using only built-in tools.
 
-Say, I often solved the above mentioned problem using the system python with the following one-liner
+Say, I often solved the problem mentioned above using the system python with the following one-liner
 
 ```bash
 $ python3 -mhttp.server
@@ -21,9 +21,9 @@ Serving HTTP on 0.0.0.0 port 8000 ...
 
 This command starts the web server in the current folder and allows you to get a list of files through the web interface and download them. You can find more similar tricks here: https://gist.github.com/willurd/5720255.
 
-There are several inconveniences though. Now to transfer the download link to your colleague, you need to know your IP address on the network.
+There are several inconveniences though. Now to transfer the download link to your colleague, you need to know your network IP address.
 
-For this it is convenient to use the command
+For this you can just do:
 
 ```bash
 $ ifconfig -a 
@@ -67,14 +67,14 @@ So, it's time to formalize what we will build:
 
 At the [JEEConf](https://jeeconf.com/) conference, which I attended not so long ago, the [Graal](https://www.graalvm.org/) topic was raised repeatedly. The topic is far from new, but for me it was a trigger to finally touch this beast with my own hands.
 
-For those who are not yet in context (do these people exist? oO) let me remind you that GraalVM is a pumped-up JVM from Oracle with additional features, the most notable of which are:
+For those who are not yet in context (do these people exist? oO) let me remind you that GraalVM is a JVM on steroids from Oracle with additional features, the most notable of which are:
 1. Polyglot JVM - the ability to seamlessly launch Java, Javascript, Python, Ruby, R, etc. code
 1. Support AOT compilation - compiling Java directly into a native binary
 1. A less noticeable, but very cool feature - the C2 compiler has been rewritten from C++ to Java for the purpose of more convenient further development. This has already produced noticeable results. This compiler makes much more optimizations at the stage of converting Java bytecode to native code. For example, it is able to remove allocations more efficiently. Twitter was able to reduce CPU consumption by 11% simply by turning on this setting, which in their scale gave a noticeable saving of resources (and money).
 
 You can refresh your knowledge of ​​Graal for example [in this article](https://chrisseaton.com/truffleruby/tenthings/).
 
-We will write in Java, so for us the most relevant feature will be an AOT compilation.
+For implementation we will use Java, so for us the most relevant feature will be an AOT compilation.
 
 Actually, the result of the development is presented [in this Github repository](https://github.com/xonixx/serv).
 
@@ -105,7 +105,7 @@ wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
 Yes, that simple!
 
-Please note - the program itself determines the correct IP address on which files will be served for download.
+Please note that the program itself determines the correct IP address on which files will be served for download.
 
 ## Observations / Reflections
 
@@ -116,7 +116,7 @@ $ du -hs `which serv`
 2.4M	/usr/local/bin/serv 
 ```
 
-Incredibly, the entire JVM, along with the application code, fit in just a few megabytes! Of course, everything is somewhat more complex, but more on that later.
+Incredibly, the entire JVM along with the application code fits in just a few megabytes! Of course, everything is somewhat more complex, but more on that later.
 
 In fact, the Graal compiler produces a binary of slightly more than 7 megs. I decided to additionally [compress it with UPX](https://github.com/upx/upx).
 
@@ -142,7 +142,7 @@ user    0m0.021s
 sys     0m0.000s
 ```
 
-For comparison, the launch time "in the traditional way":
+For you to compare here is the launch time "in the traditional way":
 ```bash
 $ time java -cp "/home/xonix/proj/serv/target/classes:/home/xonix/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar:/home/xonix/.m2/repository/org/apache/commons/commons-compress/1.18/commons-compress-1.18.jar" com.cmlteam.serv.Serv -v
 0.1
@@ -152,7 +152,7 @@ user    0m0.030s
 sys     0m0.019s
 ```
 
-As you can see, two times slower than the UPX-version.
+As you can see it is two times slower than the UPX-version.
 
 In general, a short starting time is one of the strengths of GraalVM. This, as well as the low memory consumption, caused a significant enthusiasm around using this technology for microservices and serverless.
 
