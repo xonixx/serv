@@ -2,7 +2,7 @@
 
 ## Problem definition
 
-Periodically I need to share files over a local network, for example, with a project colleague.
+From time to time I need to share files over a local network for example with a project colleague.
 
 There are a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira, or even send as email.
 
@@ -164,14 +164,14 @@ However my fears were completely in vain. For convenience I used two dependencie
 1. `commons-cli` - to parse command line arguments
 1. `commons-compress` - to generate a folder tarball and optional gzip compression
 
-The file size increase was barely noticeable. I would assume that the Graal compiler is very smart so as not to put all the used jar-files into the executable but only the code that is actually used by the application.
+The file size increase was barely noticeable. I would assume that the Graal compiler is smart enough so as not to put all the used jar-files into the executable but only the code that is actually used by the application.
 
-Compiling into native code on Graal is performed by the [native-image](https://www.graalvm.org/docs/reference-manual/aot-compilation/) utility. It is worth mentioning that this process is resource intensive. Say, in my not very slow configuration with an Intel 7700K CPU on board, this process takes 19 seconds. Therefore, I recommend to run the program during development as usual (via java), and assemble the binary at the final stage.
+Compiling into native code on Graal is performed by the [native-image](https://www.graalvm.org/docs/reference-manual/aot-compilation/) utility. It is worth mentioning that this process is resource intensive. Say, in my not very slow configuration with an Intel 7700K CPU on board this process takes 19 seconds. Therefore I recommend to run the program during development as usual (via java) and assemble the binary at the final stage.
 
 ## Findings
 
-I think the experiment turned out to be very successful. During the development using the Graal toolkit I did not encounter any significant problems. Everything worked predictably and consistently. Although it will almost certainly not be so smooth if you try to do something more complicated, for example, [Spring Boot app](https://royvanrijn.com/blog/2018/09/part-2-native-microservice-in-graalvm/). Nevertheless, a number of platforms has already been presented that claim to support Graal natively. Among them are [Micronaut](https://micronaut.io/), [Microprofile](https://microprofile.io/), [Quarkus](https://quarkus.io/).
+I think the experiment turned out to be very successful. During the development using the Graal toolkit I didn't encounter any significant problems. Everything worked predictably and consistently. Although it can be not so smooth if you try to do something more complex, for example [Spring Boot app](https://royvanrijn.com/blog/2018/09/part-2-native-microservice-in-graalvm/). Nevertheless, a number of platforms has already been presented that claim to support Graal natively. Among them are [Micronaut](https://micronaut.io/), [Microprofile](https://microprofile.io/), [Quarkus](https://quarkus.io/).
 
-As for the further development of the project the [list of improvements](https://github.com/xonixx/serv/issues) is already planned for version 0.2. Also at the moment only building of the binary for Linux x64 is implemented. I hope that this will improve, especially since the Graal compiler supports MacOS and Windows. Unfortunately it does not yet support cross-compilation, which could really help here.
+As for the further development of the project the [list of improvements](https://github.com/xonixx/serv/issues) is already planned for version 0.2. Also at the moment only building of the binary for Linux x64 is implemented. I hope that this will improve especially since the Graal compiler supports MacOS and Windows. Unfortunately it does not yet support cross-compilation that could really help here.
 
 I hope that the presented utility will be useful at least to someone from the respected community. I would be glad twice if there are those who want to contribute [into the project](https://github.com/xonixx/serv).
