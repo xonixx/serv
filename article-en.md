@@ -2,11 +2,11 @@
 
 ## Problem definition
 
-From time to time I need to share files over a local network for example with a project colleague.
+From time to time I need to share files over a local network for instance with a project colleague.
 
 There are a lot of solutions for this - Samba / FTP / scp. You can simply upload the file to a publicly accessible place like Google Drive, attach it to a task in Jira, or even send as email.
 
-But all this is to some extent inflexible, sometimes it requires preliminary setup and has its limitations (for example, the maximum size of the attachment).
+But all this is to some extent inflexible, sometimes it requires preliminary setup and has its limitations (for example the maximum size of the attachment).
 
 And you want something more lightweight and flexible.
 
