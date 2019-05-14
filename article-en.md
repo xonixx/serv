@@ -28,11 +28,11 @@ For this you can just do:
 ```bash
 $ ifconfig -a 
 ```
-And then from the received list of network interfaces, select the appropriate one and manually compile a link like http://IP:8000, which you then send.
+And then from the received list of network interfaces select the appropriate one and manually compile a link like http://IP:8000. Now send it to your colleague.
 
-The second inconvenience: this server is single threaded. This means that while one of your colleagues is downloading the file, the other one will not even be able to see the list of files.
+The second inconvenience: this server is single threaded. Thus while one of your colleagues is downloading the file the other one will not even be able to see the list of files.
 
-Thirdly - it is inflexible. If you need to transfer only one file, it will be unnecessary to open the entire folder, i.e. you will have to perform such gestures (and don't forget to clean up the garbage afterwards):
+Thirdly - it is inflexible. If you need to transfer only one file it will be unnecessary to open the entire folder i.e. you will have to perform such gestures (and don't forget to clean up the garbage afterwards):
 
 ```bash
 $ mkdir tmp1
@@ -45,38 +45,38 @@ The fourth inconvenience - there is no _simple_ way to download the entire conte
 
 To transfer the contents of the folder a technique called [tar pipe](https://docstore.mik.ua/orelly/unix3/upt/ch10_13.htm) is usually used.
 
-Something like this:
+Example:
 ```bash
 $ ssh user@host 'cd /path/to/source && tar cf - .' | cd /path/to/destination && tar xvf -
 ```
 
-No worry if it's not clear, I will explain how it works. The first part of the `tar cf - .` command will compile an archive of the contents of the current folder and write to standard output. Then this output through the pipe is transmitted via a secure ssh channel to the input of a similar command `tar xvf -` which does the reverse procedure, i.e. reads standard input and unzips to current folder. In fact, there is a transfer of archived data, but without creating an intermediate file!
+No worry if it's not clear, I will explain how it works. The first part of the `tar cf - .` command compiles an archive of the contents of the current folder and writes to standard output. Then the output is transmitted through the pipe via a secure ssh channel to the input of a similar command `tar xvf -` which does the reverse procedure i.e. reads standard input and unzips to current folder. In fact this is a transfer of archived data but without creating an intermediate file!
 
-Obviously, this approach has small inconvenience. You need ssh access from one machine to another, which generally almost never is set up.
+Obviously this approach is "slightly" inconvenience. You need to have ssh access from one machine to another which generally is almost never set up.
 
-Is it possible to achieve all of the above, but without the described problems?
+Is it possible to achieve same functionality but without the problems described?
 
-So, it's time to formalize what we will build:
+Finally let's formalize what we are going to build:
 1. A program that is easy to install (static binary)
-1. Which allows to transfer both the file and the folder with all contents
+1. Able to transfer both the file and the folder with all contents
 1. With optional compression
 1. Which allows the receiving party to download the file(s) using only standard *nix tools (wget/curl/tar)
-1. After launch, the program immediately issues exact commands for downloading.
+1. After launch the program immediately shows the exact commands for downloading.
 
 ## Solution
 
-At the [JEEConf](https://jeeconf.com/) conference, which I attended not so long ago, the [Graal](https://www.graalvm.org/) topic was raised repeatedly. The topic is far from new, but for me it was a trigger to finally touch this beast with my own hands.
+At the [JEEConf](https://jeeconf.com/) conference that I attended not long ago the topic of [Graal](https://www.graalvm.org/) was raised pretty often. The topic is far from new but finally I had a chance to play with it on my own.
 
-For those who are not yet in context (do these people exist? oO) let me remind you that GraalVM is a JVM on steroids from Oracle with additional features, the most notable of which are:
+For those who are not yet in context (do these people exist? oO) let me remind you that GraalVM is a JVM on steroids from Oracle with additional features. The most notable are:
 1. Polyglot JVM - the ability to seamlessly launch Java, Javascript, Python, Ruby, R, etc. code
 1. Support AOT compilation - compiling Java directly into a native binary
-1. A less noticeable, but very cool feature - the C2 compiler has been rewritten from C++ to Java for the purpose of more convenient further development. This has already produced noticeable results. This compiler makes much more optimizations at the stage of converting Java bytecode to native code. For example, it is able to remove allocations more efficiently. Twitter was able to reduce CPU consumption by 11% simply by turning on this setting, which in their scale gave a noticeable saving of resources (and money).
+1. A less noticeable but very cool feature: the C2 compiler has been rewritten from C++ to Java for the purpose of more convenient further development. This has already produced noticeable results. The new compiler makes much more optimizations at the stage of converting Java bytecode to the native code. It is able to remove allocations more efficiently. Twitter has reduced CPU consumption by 11% simply by turning on this setting. At their scale it gave a noticeable saving of resources (and money).
 
-You can refresh your knowledge of ​​Graal for example [in this article](https://chrisseaton.com/truffleruby/tenthings/).
+You can refresh your knowledge of ​​Graal [in this article](https://chrisseaton.com/truffleruby/tenthings/).
 
-For implementation we will use Java, so for us the most relevant feature will be an AOT compilation.
+For implementation we will use Java so for us the most relevant feature will be an AOT compilation.
 
-Actually, the result of the development is presented [in this Github repository](https://github.com/xonixx/serv).
+Actually the result of the development is presented [in this Github repository](https://github.com/xonixx/serv).
 
 An example of usage for transferring a single file:
 
@@ -105,7 +105,7 @@ wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
 Yes, that simple!
 
-Please note that the program itself determines the correct IP address on which files will be served for download.
+Please note that the program itself determines the correct IP address serving the files.
 
 ## Observations / Reflections
 
@@ -118,9 +118,9 @@ $ du -hs `which serv`
 
 Incredibly, the entire JVM along with the application code fits in just a few megabytes! Of course, everything is somewhat more complex, but more on that later.
 
-In fact, the Graal compiler produces a binary of slightly more than 7 megs. I decided to additionally [compress it with UPX](https://github.com/upx/upx).
+In fact the Graal compiler produces a binary of slightly more than 7 megs. Additionally I decided [compress it with UPX](https://github.com/upx/upx).
 
-This turned out to be a good idea, since the launch time increase was rather small:
+This turned out to be a good idea since the launch time increase was rather small.
 
 Uncompressed version:
 ```bash
@@ -154,17 +154,17 @@ sys     0m0.019s
 
 As you can see it is two times slower than the UPX-version.
 
-In general, a short starting time is one of the strengths of GraalVM. This, as well as the low memory consumption, caused a significant enthusiasm around using this technology for microservices and serverless.
+In general a short starting time is one of the strengths of GraalVM. This as well as the low memory consumption caused a significant enthusiasm around using this technology for microservices and serverless.
 
-I tried to make the logic of the program as minimal as possible and use a minimum of libraries. Such an approach is recommended overall, but in this case I had concerns that adding third-party maven dependencies would significantly increase the resulting program file.
+I tried to make the logic of the program as minimal as possible and use a minimum amount of libraries. Such an approach is always recommended but additionally in this case I had concerns that adding third-party maven dependencies would significantly increase the size of the resulting program file.
 
-Therefore for example I did not use third-party dependencies for a Java web server (there are a lot of them for every taste), but I used the JDK implementation of a web server from the `com.sun.net.httpserver.*` package. In general, using the `com.sun.*` package is considered a bad practice, but I found it acceptable in this case, since I compile it into native code, and this means the compatibility among the JVMs is not so important.
+Therefore I didn't use third-party dependencies for Java web server. Instead I used the JDK implementation from the `com.sun.net.httpserver.*` package. In general using the `com.sun.*` package is considered as a bad practice. I found it acceptable in this case since I compile it into native code and this means the compatibility among the JVMs is not so important.
 
-However, my fears were completely in vain. In the program, I used two dependencies for convenience.
-1. `commons-cli` - for parsing command line arguments
+However my fears were completely in vain. For convenience I used two dependencies in the program.
+1. `commons-cli` - to parse command line arguments
 1. `commons-compress` - to generate a folder tarball and optional gzip compression
 
-And the file size increase was barely noticeable. I would assume that the Graal compiler is very smart so as not to put all the used jar-files into the executable file, but only the code that is actually used by the application code.
+The file size increase was barely noticeable. I would assume that the Graal compiler is very smart so as not to put all the used jar-files into the executable but only the code that is actually used by the application.
 
 Compiling into native code on Graal is performed by the [native-image](https://www.graalvm.org/docs/reference-manual/aot-compilation/) utility. It is worth mentioning that this process is resource intensive. Say, in my not very slow configuration with an Intel 7700K CPU on board, this process takes 19 seconds. Therefore, I recommend to run the program during development as usual (via java), and assemble the binary at the final stage.
 
