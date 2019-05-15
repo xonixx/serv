@@ -19,6 +19,11 @@ class HttpHandlerServeFolderTar extends HttpHandlerBase {
   public void handle(HttpExchange httpExchange) throws IOException {
     log(httpExchange);
     boolean isCompress = isCompressed(httpExchange);
+    httpExchange
+        .getResponseHeaders()
+        .add(
+            "Content-Disposition",
+            "attachment; filename=\"folder.tar" + (isCompress ? ".gz" : "") + "\"");
     httpExchange.sendResponseHeaders(200, 0);
     OutputStream os = httpExchange.getResponseBody();
     TarUtil.compress(os, folder, isCompress);

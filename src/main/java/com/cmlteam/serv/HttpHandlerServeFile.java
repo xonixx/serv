@@ -25,6 +25,9 @@ class HttpHandlerServeFile extends HttpHandlerBase {
     if (isCompress) {
       httpExchange.getResponseHeaders().add("Content-Encoding", "gzip");
     }
+    httpExchange
+        .getResponseHeaders()
+        .add("Content-Disposition", "attachment; filename=\"" + escapeFileName(file) + "\"");
     httpExchange.sendResponseHeaders(200, 0);
     OutputStream outputStream = httpExchange.getResponseBody();
     Path path = file.toPath();

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
+#set -x
 
 GRAAL=~/soft/graalvm-ce-19.0.0
 UPX=~/soft/upx-3.95-amd64_linux
