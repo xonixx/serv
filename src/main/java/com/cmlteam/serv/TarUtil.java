@@ -20,7 +20,7 @@ class TarUtil {
       File[] files = folder.listFiles();
       if (files != null) {
         for (File file : files) {
-          addToArchiveCompression(out, file, ".");
+          addToArchiveCompression(out, file, "");
         }
       }
     }
