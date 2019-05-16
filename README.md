@@ -34,9 +34,10 @@ Help message:
 $ serv -h
 serv ver. 0.1
 usage: serv [...options] <file or folder>
+ -H,--host <arg>   host to serve on (default is determined automatically)
  -h,--help         print help and exit
  -p,--port <arg>   port to serve on (default = 17777)
- -v,--version      show version and exit
+ -v,--version      print version and exit
 ```
 
 *Yes! All that simple!*
