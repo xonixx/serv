@@ -14,13 +14,20 @@ class TarUtil {
 
   private TarUtil() {}
 
-  static void compress(OutputStream outputStream, File folder, boolean compress)
+  /**
+   * @param outputStream output stream to write to
+   * @param folder folder to compress
+   * @param tarOptions tar compression options
+   * @throws IOException in case of IO exception
+   */
+  static void compress(OutputStream outputStream, File folder, TarOptions tarOptions)
       throws IOException {
-    try (TarArchiveOutputStream out = getTarArchiveOutputStream(outputStream, compress)) {
+    try (TarArchiveOutputStream out =
+        getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
       File[] files = folder.listFiles();
       if (files != null) {
         for (File file : files) {
-          addToArchiveCompression(out, file, "");
+          addToArchiveCompression(out, file, "", tarOptions);
         }
       }
     }
@@ -40,8 +47,13 @@ class TarUtil {
     return taos;
   }
 
-  private static void addToArchiveCompression(TarArchiveOutputStream out, File file, String dir)
-      throws IOException {
+  private static void addToArchiveCompression(
+      TarArchiveOutputStream out, File file, String dir, TarOptions tarOptions) throws IOException {
+
+    if (tarOptions.shouldExclude(file)) {
+      return;
+    }
+
     String entry = dir + File.separator + file.getName();
     if (file.isFile()) {
       out.putArchiveEntry(new TarArchiveEntry(file, entry));
@@ -53,7 +65,7 @@ class TarUtil {
       File[] children = file.listFiles();
       if (children != null) {
         for (File child : children) {
-          addToArchiveCompression(out, child, entry);
+          addToArchiveCompression(out, child, entry, tarOptions);
         }
       }
     } else {
