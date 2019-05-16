@@ -18,7 +18,7 @@ public class Serv {
 
     Command command = parseCommandFromArgs(args);
 
-    String serveIp = IpUtil.getLocalNetworkIp();
+    String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     String url = "http://" + serveIp + ":" + command.servePort + "/dl";
     String urlZ = url + "?z";
     File file = command.file;
@@ -57,12 +57,17 @@ public class Serv {
   private static Command parseCommandFromArgs(String[] args) {
     Options options = new Options();
 
+    Option host =
+        new Option("H", "host", true, "host to serve on (default is determined automatically)");
+    host.setRequired(false);
+    options.addOption(host);
+
     Option port =
         new Option("p", "port", true, "port to serve on (default = " + DEFAULT_PORT + ")");
     port.setRequired(false);
     options.addOption(port);
 
-    Option version = new Option("v", "version", false, "show version and exit");
+    Option version = new Option("v", "version", false, "print version and exit");
     version.setRequired(false);
     options.addOption(version);
 
@@ -103,7 +108,9 @@ public class Serv {
     }
 
     return new Command(
-        file, Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)));
+        file,
+        cmd.getOptionValue(host.getLongOpt()),
+        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
