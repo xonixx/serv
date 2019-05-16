@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 class HttpHandlerServeFolderTar extends HttpHandlerBase {
-  private File folder;
+  private final File folder;
+  private final boolean includeVcsFiles;
 
-  HttpHandlerServeFolderTar(File folder) {
+  HttpHandlerServeFolderTar(File folder, boolean includeVcsFiles) {
     if (!folder.isDirectory())
       throw new IllegalArgumentException("Should be folder, file given: " + folder);
     this.folder = folder;
+    this.includeVcsFiles = includeVcsFiles;
   }
 
   @Override
@@ -26,7 +28,8 @@ class HttpHandlerServeFolderTar extends HttpHandlerBase {
             "attachment; filename=\"folder.tar" + (isCompress ? ".gz" : "") + "\"");
     httpExchange.sendResponseHeaders(200, 0);
     OutputStream os = httpExchange.getResponseBody();
-    TarUtil.compress(os, folder, TarOptions.builder().compress(isCompress).build());
+    TarUtil.compress(
+        os, folder, TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
     os.flush();
     os.close();
   }

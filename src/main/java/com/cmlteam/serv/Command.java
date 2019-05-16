@@ -6,11 +6,13 @@ public class Command {
   final File file;
   final String serveHost;
   final int servePort;
+  final boolean includeVcsFiles;
 
-  Command(File file, String serveHost, int servePort) {
+  Command(File file, String serveHost, int servePort, boolean includeVcsFiles) {
     this.file = file;
     this.serveHost = serveHost;
     this.servePort = servePort;
+    this.includeVcsFiles = includeVcsFiles;
   }
 
   @Override
@@ -23,6 +25,8 @@ public class Command {
         + '\''
         + ", servePort="
         + servePort
+        + ", includeVcsFiles="
+        + includeVcsFiles
         + '}';
   }
 }

@@ -52,6 +52,7 @@ class TarOptions {
               ".hgrags",
               "_darcs"));
 
+  @SuppressWarnings("unused")
   static class TarOptionsBuilder {
     TarOptionsBuilder excludeVcs(boolean excludeVcs) {
       if (excludeVcs) {

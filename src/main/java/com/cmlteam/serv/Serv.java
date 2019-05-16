@@ -49,7 +49,10 @@ public class Serv {
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext(
-        "/dl", isFolder ? new HttpHandlerServeFolderTar(file) : new HttpHandlerServeFile(file));
+        "/dl",
+        isFolder
+            ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
+            : new HttpHandlerServeFile(file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -74,6 +77,11 @@ public class Serv {
     Option help = new Option("h", "help", false, "print help and exit");
     help.setRequired(false);
     options.addOption(help);
+
+    Option includeVcsFiles =
+        new Option(null, "include-vcs", false, "include VCS files (default = false)");
+    includeVcsFiles.setRequired(false);
+    options.addOption(includeVcsFiles);
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd;
@@ -110,7 +118,8 @@ public class Serv {
     return new Command(
         file,
         cmd.getOptionValue(host.getLongOpt()),
-        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)));
+        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)),
+        cmd.hasOption(includeVcsFiles.getLongOpt()));
   }
 
   private static IllegalStateException printHelpAndExit(String message, Options options) {
