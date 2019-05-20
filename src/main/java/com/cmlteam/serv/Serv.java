@@ -24,28 +24,49 @@ public class Serv {
     File file = command.file;
     boolean isFolder = file.isDirectory();
 
+    StringBuilder output = new StringBuilder();
+
     if (isFolder) {
-      System.out.println("To download the files please use one of the commands below. ");
-      System.out.println("NB! All files will be placed into current folder!");
-      System.out.println();
+      output.append("To download the files please use one of the commands below.\n");
+      output.append("NB! All files will be placed into current folder!\n\n");
 
       String extractPart = " | tar -xvf -";
-      System.out.println("curl " + url + extractPart);
-      System.out.println("wget -O- " + url + extractPart);
+      output.append("curl ").append(url).append(extractPart);
+      output.append('\n');
+      output.append("wget -O- ").append(url).append(extractPart);
+      output.append('\n');
 
       String extractPartZ = " | tar -xzvf -";
-      System.out.println("curl " + urlZ + extractPartZ);
-      System.out.println("wget -O- " + urlZ + extractPartZ);
+      output.append("curl ").append(urlZ).append(extractPartZ);
+      output.append('\n');
+      output.append("wget -O- ").append(urlZ).append(extractPartZ);
+      output.append('\n');
     } else {
-      System.out.println("To download the file please use one of the commands below: ");
-      System.out.println();
+      output.append("To download the file please use one of the commands below:\n\n");
 
-      System.out.println("curl " + url + " > '" + file.getName() + "'");
-      System.out.println("wget -O- " + url + " > '" + file.getName() + "'");
+      output.append("curl ").append(url).append(" > '").append(file.getName()).append("'");
+      output.append('\n');
+      output.append("wget -O- ").append(url).append(" > '").append(file.getName()).append("'");
+      output.append('\n');
 
-      System.out.println("curl " + urlZ + " --compressed > '" + file.getName() + "'");
-      System.out.println("wget -O- " + urlZ + " | gunzip > '" + file.getName() + "'");
+      output
+          .append("curl ")
+          .append(urlZ)
+          .append(" --compressed > '")
+          .append(file.getName())
+          .append("'");
+      output.append('\n');
+      output
+          .append("wget -O- ")
+          .append(urlZ)
+          .append(" | gunzip > '")
+          .append(file.getName())
+          .append("'");
+      output.append('\n');
     }
+
+    String outputString = output.toString();
+    System.out.println(outputString);
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext(
