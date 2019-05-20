@@ -9,14 +9,16 @@ import java.util.List;
 
 public class Serv {
 
-  private static final String UTILITY_HELP_LINE = Constants.UTILITY_NAME + " [...options] <file or folder>";
+  private static final String UTILITY_HELP_LINE =
+      Constants.UTILITY_NAME + " [...options] <file or folder>";
 
   public static void main(String[] args) throws Exception {
 
     Command command = parseCommandFromArgs(args);
 
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
-    String url = "http://" + serveIp + ":" + command.servePort + "/dl";
+    String urlRoot = "http://" + serveIp + ":" + command.servePort + "/";
+    String url = urlRoot + "dl";
     String urlZ = url + "?z";
     File file = command.file;
     boolean isFolder = file.isDirectory();
@@ -63,7 +65,7 @@ public class Serv {
     }
 
     String outputString = output.toString();
-    System.out.println(outputString);
+    System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext("/", new HttpHandlerWebInfoPage(outputString));
@@ -85,7 +87,8 @@ public class Serv {
     options.addOption(host);
 
     Option port =
-        new Option("p", "port", true, "port to serve on (default = " + Constants.DEFAULT_PORT + ")");
+        new Option(
+            "p", "port", true, "port to serve on (default = " + Constants.DEFAULT_PORT + ")");
     port.setRequired(false);
     options.addOption(port);
 

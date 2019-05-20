@@ -15,6 +15,8 @@ curl http://192.168.0.179:17777/dl > 'report.pdf'
 wget -O- http://192.168.0.179:17777/dl > 'report.pdf'
 curl http://192.168.0.179:17777/dl?z --compressed > 'report.pdf'
 wget -O- http://192.168.0.179:17777/dl?z | gunzip > 'report.pdf'
+
+Or just open in browser: http://192.168.0.179:17777/
 ```
 
 Sharing a folder (all the files in it):
@@ -27,12 +29,14 @@ curl http://192.168.0.179:17777/dl | tar -xvf -
 wget -O- http://192.168.0.179:17777/dl | tar -xvf -
 curl http://192.168.0.179:17777/dl?z | tar -xzvf -
 wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
+
+Or just open in browser: http://192.168.0.179:17777/
 ```
 
 Help message:
 ```
 $ serv -h
-serv ver. 0.1
+serv ver. 0.2.0
 usage: serv [...options] <file or folder>
  -H,--host <arg>    host to serve on (default is determined automatically)
  -h,--help          print help and exit
