@@ -9,10 +9,7 @@ import java.util.List;
 
 public class Serv {
 
-  private static final String VERSION = "0.1";
-  private static final int DEFAULT_PORT = 17777;
-  private static final String UTILITY_NAME = "serv";
-  private static final String UTILITY_HELP_LINE = UTILITY_NAME + " [...options] <file or folder>";
+  private static final String UTILITY_HELP_LINE = Constants.UTILITY_NAME + " [...options] <file or folder>";
 
   public static void main(String[] args) throws Exception {
 
@@ -69,6 +66,7 @@ public class Serv {
     System.out.println(outputString);
 
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
+    server.createContext("/", new HttpHandlerWebInfoPage(outputString));
     server.createContext(
         "/dl",
         isFolder
@@ -87,7 +85,7 @@ public class Serv {
     options.addOption(host);
 
     Option port =
-        new Option("p", "port", true, "port to serve on (default = " + DEFAULT_PORT + ")");
+        new Option("p", "port", true, "port to serve on (default = " + Constants.DEFAULT_PORT + ")");
     port.setRequired(false);
     options.addOption(port);
 
@@ -114,14 +112,14 @@ public class Serv {
     }
 
     if (cmd.hasOption(help.getLongOpt())) {
-      System.out.println(UTILITY_NAME + " ver. " + VERSION);
+      System.out.println(Constants.UTILITY_NAME + " ver. " + Constants.VERSION);
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(UTILITY_HELP_LINE, options);
       System.exit(0);
     }
 
     if (cmd.hasOption(version.getLongOpt())) {
-      System.out.println(VERSION);
+      System.out.println(Constants.VERSION);
       System.exit(0);
     }
 
@@ -139,7 +137,7 @@ public class Serv {
     return new Command(
         file,
         cmd.getOptionValue(host.getLongOpt()),
-        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + DEFAULT_PORT)),
+        Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + Constants.DEFAULT_PORT)),
         cmd.hasOption(includeVcsFiles.getLongOpt()));
   }
 
