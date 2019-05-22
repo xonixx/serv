@@ -55,8 +55,9 @@ To install or update the tool simply run the command below.
 
 ```
 $ sudo bash -c "
-wget https://github.com/xonixx/serv/releases/download/v0.2.0/serv-linux-amd-64.executable -O/usr/local/bin/serv
-chmod +x /usr/local/bin/serv 
+wget https://github.com/xonixx/serv/releases/download/v0.2.0/serv-linux-amd-64 -O/usr/local/bin/serv
+chmod +x /usr/local/bin/serv
+echo \"serv \$(serv -v) installed successfully\" 
 "
 ```
 
