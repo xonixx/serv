@@ -51,11 +51,11 @@ usage: serv [...options] <file or folder>
 
 Sorry, but only Linux x64 is supported at the moment. Hopefully this will improve.
 
-To install the tool simply run the command below.
+To install or update the tool simply run the command below.
 
 ```
 $ sudo bash -c "
-wget https://github.com/xonixx/serv/releases/download/v0.1/serv-linux-amd-64.executable -O/usr/local/bin/serv
+wget https://github.com/xonixx/serv/releases/download/v0.2.0/serv-linux-amd-64.executable -O/usr/local/bin/serv
 chmod +x /usr/local/bin/serv 
 "
 ```
