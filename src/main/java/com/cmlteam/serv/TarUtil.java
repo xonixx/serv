@@ -17,24 +17,11 @@ class TarUtil {
 
   /**
    * @param outputStream output stream to write to
-   * @param folder folder to compress
+   * @param files files to compress
    * @param tarOptions tar compression options
    * @throws IOException in case of IO exception
    */
-  static void compress(OutputStream outputStream, File folder, TarOptions tarOptions)
-      throws IOException {
-    try (TarArchiveOutputStream out =
-        getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
-      File[] files = folder.listFiles();
-      if (files != null) {
-        for (File file : files) {
-          addToArchiveCompression(out, file, "", tarOptions);
-        }
-      }
-    }
-  }
-
-  static void compress(OutputStream outputStream, Set<File> files, TarOptions tarOptions)
+  static void compress(OutputStream outputStream, File[] files, TarOptions tarOptions)
       throws IOException {
     try (TarArchiveOutputStream out =
              getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {

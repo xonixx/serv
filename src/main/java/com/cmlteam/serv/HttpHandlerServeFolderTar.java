@@ -29,7 +29,7 @@ class HttpHandlerServeFolderTar extends HttpHandlerBase {
     httpExchange.sendResponseHeaders(200, 0);
     OutputStream os = httpExchange.getResponseBody();
     TarUtil.compress(
-        os, folder, TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
+        os, folder.listFiles(), TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
     os.flush();
     os.close();
   }

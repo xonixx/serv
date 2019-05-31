@@ -30,7 +30,7 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
     OutputStream os = httpExchange.getResponseBody();
 
     TarUtil.compress(
-        os, files, TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
+        os, files.toArray(new File[0]), TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
     os.flush();
     os.close();
   }

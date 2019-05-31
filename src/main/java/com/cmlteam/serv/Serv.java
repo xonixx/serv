@@ -23,86 +23,17 @@ public class Serv {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
     Set<File> files = command.files;
-    StringBuilder output = new StringBuilder();
-    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
+    String outputString;
 
-    if (files.size() == 1) {
-      File file = files.iterator().next();
-
-      boolean isFolder = file.isDirectory();
-
-
-      if (isFolder) {
-        output.append("To download the files please use one of the commands below.\n");
-        output.append("NB! All files will be placed into current folder!\n\n");
-
-        String extractPart = " | tar -xvf -";
-        output.append("curl ").append(url).append(extractPart);
-        output.append('\n');
-        output.append("wget -O- ").append(url).append(extractPart);
-        output.append('\n');
-
-        String extractPartZ = " | tar -xzvf -";
-        output.append("curl ").append(urlZ).append(extractPartZ);
-        output.append('\n');
-        output.append("wget -O- ").append(urlZ).append(extractPartZ);
-        output.append('\n');
-      } else {
-        output.append("To download the file please use one of the commands below:\n\n");
-
-        output.append("curl ").append(url).append(" > '").append(file.getName()).append("'");
-        output.append('\n');
-        output.append("wget -O- ").append(url).append(" > '").append(file.getName()).append("'");
-        output.append('\n');
-
-        output
-            .append("curl ")
-            .append(urlZ)
-            .append(" --compressed > '")
-            .append(file.getName())
-            .append("'");
-        output.append('\n');
-        output
-            .append("wget -O- ")
-            .append(urlZ)
-            .append(" | gunzip > '")
-            .append(file.getName())
-            .append("'");
-        output.append('\n');
-      }
-
-
-      String outputString = output.toString();
-      System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
-
-      server.createContext("/", new HttpHandlerWebInfoPage(outputString));
-      server.createContext(
-          "/dl",
-          isFolder
-              ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
-              : new HttpHandlerServeFile(file));
+    File file = files.iterator().next();
+    if (files.size() == 1 && !file.isDirectory()) {
+      outputString = getOutputStringForOneFileDownload(url, urlZ, file.getName());
     } else {
-      output.append("To download the files please use one of the commands below.\n");
-      output.append("NB! All files will be placed into current folder!\n\n");
-
-      String extractPart = " | tar -xvf -";
-      output.append("curl ").append(url).append(extractPart);
-      output.append('\n');
-      output.append("wget -O- ").append(url).append(extractPart);
-      output.append('\n');
-
-      String extractPartZ = " | tar -xzvf -";
-      output.append("curl ").append(urlZ).append(extractPartZ);
-      output.append('\n');
-      output.append("wget -O- ").append(urlZ).append(extractPartZ);
-      output.append('\n');
-
-      String outputString = output.toString();
-      System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
-
-      server.createContext("/", new HttpHandlerWebInfoPage(outputString));
-      server.createContext("/dl", new HttpHandlerServeFilesTar(files, command.includeVcsFiles));
+      outputString = getOutputStringForMultipleFilesDownload(url, urlZ);
     }
+
+    System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
+    HttpServer server = createServerWithContext(command, outputString, files);
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -160,15 +91,16 @@ public class Serv {
     if (argList.isEmpty()) {
       throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
     }
-    Set<File> files = new HashSet<>();
-      for (int i = 0; i < argList.size(); i++) {
-        File file = new File(argList.get(i));
 
-        if (!file.exists()) {
-          throw printHelpAndExit("File/folder doesn't exist", options);
-        }
-        files.add(file);
+    Set<File> files = new HashSet<>();
+    argList.forEach(argument -> {
+      File file = new File(argument);
+      if (!file.exists()) {
+        throw printHelpAndExit("File/folder doesn't exist", options);
       }
+      files.add(file);
+    });
+
     return new Command(
         files,
         cmd.getOptionValue(host.getLongOpt()),
@@ -184,5 +116,69 @@ public class Serv {
     formatter.printHelp(UTILITY_HELP_LINE, options);
     System.exit(1);
     return new IllegalStateException();
+  }
+
+  private static String getOutputStringForMultipleFilesDownload(String url, String urlZ) {
+    StringBuilder output = new StringBuilder();
+    output.append("To download the files please use one of the commands below.\n");
+    output.append("NB! All files will be placed into current folder!\n\n");
+
+    String extractPart = " | tar -xvf -";
+    output.append(getOutputStringByUrlAndExtractPart(url, extractPart));
+
+    String extractPartZ = " | tar -xzvf -";
+    output.append(getOutputStringByUrlAndExtractPart(urlZ, extractPartZ));
+
+    return output.toString();
+  }
+
+  private static StringBuilder getOutputStringByUrlAndExtractPart(String url, String extractPart) {
+    StringBuilder output = new StringBuilder();
+    output.append("curl ").append(url).append(extractPart);
+    output.append('\n');
+    output.append("wget -O- ").append(url).append(extractPart);
+    output.append('\n');
+    return output;
+  }
+
+  private static String getOutputStringForOneFileDownload(String url, String urlZ, String fileName) {
+    StringBuilder output = new StringBuilder();
+    output.append("To download the file please use one of the commands below:\n\n");
+
+    output.append("curl ").append(url).append(" > '").append(fileName).append("'");
+    output.append('\n');
+    output.append("wget -O- ").append(url).append(" > '").append(fileName).append("'");
+    output.append('\n');
+
+    output
+        .append("curl ")
+        .append(urlZ)
+        .append(" --compressed > '")
+        .append(fileName)
+        .append("'");
+    output.append('\n');
+    output
+        .append("wget -O- ")
+        .append(urlZ)
+        .append(" | gunzip > '")
+        .append(fileName)
+        .append("'");
+    output.append('\n');
+    return output.toString();
+  }
+
+  private static HttpServer createServerWithContext(Command command, String outputString, Set<File> files) throws Exception {
+    String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
+    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
+    server.createContext("/", new HttpHandlerWebInfoPage(outputString));
+    if (files.size() == 1) {
+      File file = files.iterator().next();
+      server.createContext(
+          "/dl",
+          file.isDirectory()
+              ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
+              : new HttpHandlerServeFile(file));
+    } else server.createContext("/dl", new HttpHandlerServeFilesTar(files, command.includeVcsFiles));
+    return server;
   }
 }
