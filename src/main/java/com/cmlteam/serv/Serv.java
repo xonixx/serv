@@ -5,7 +5,9 @@ import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Serv {
 
@@ -20,12 +22,66 @@ public class Serv {
     String urlRoot = "http://" + serveIp + ":" + command.servePort + "/";
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
-    File file = command.file;
-    boolean isFolder = file.isDirectory();
-
+    Set<File> files = command.files;
     StringBuilder output = new StringBuilder();
+    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
 
-    if (isFolder) {
+    if (files.size() == 1) {
+      File file = files.iterator().next();
+
+      boolean isFolder = file.isDirectory();
+
+
+      if (isFolder) {
+        output.append("To download the files please use one of the commands below.\n");
+        output.append("NB! All files will be placed into current folder!\n\n");
+
+        String extractPart = " | tar -xvf -";
+        output.append("curl ").append(url).append(extractPart);
+        output.append('\n');
+        output.append("wget -O- ").append(url).append(extractPart);
+        output.append('\n');
+
+        String extractPartZ = " | tar -xzvf -";
+        output.append("curl ").append(urlZ).append(extractPartZ);
+        output.append('\n');
+        output.append("wget -O- ").append(urlZ).append(extractPartZ);
+        output.append('\n');
+      } else {
+        output.append("To download the file please use one of the commands below:\n\n");
+
+        output.append("curl ").append(url).append(" > '").append(file.getName()).append("'");
+        output.append('\n');
+        output.append("wget -O- ").append(url).append(" > '").append(file.getName()).append("'");
+        output.append('\n');
+
+        output
+            .append("curl ")
+            .append(urlZ)
+            .append(" --compressed > '")
+            .append(file.getName())
+            .append("'");
+        output.append('\n');
+        output
+            .append("wget -O- ")
+            .append(urlZ)
+            .append(" | gunzip > '")
+            .append(file.getName())
+            .append("'");
+        output.append('\n');
+      }
+
+
+      String outputString = output.toString();
+      System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
+
+      server.createContext("/", new HttpHandlerWebInfoPage(outputString));
+      server.createContext(
+          "/dl",
+          isFolder
+              ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
+              : new HttpHandlerServeFile(file));
+    } else {
       output.append("To download the files please use one of the commands below.\n");
       output.append("NB! All files will be placed into current folder!\n\n");
 
@@ -40,40 +96,13 @@ public class Serv {
       output.append('\n');
       output.append("wget -O- ").append(urlZ).append(extractPartZ);
       output.append('\n');
-    } else {
-      output.append("To download the file please use one of the commands below:\n\n");
 
-      output.append("curl ").append(url).append(" > '").append(file.getName()).append("'");
-      output.append('\n');
-      output.append("wget -O- ").append(url).append(" > '").append(file.getName()).append("'");
-      output.append('\n');
+      String outputString = output.toString();
+      System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
 
-      output
-          .append("curl ")
-          .append(urlZ)
-          .append(" --compressed > '")
-          .append(file.getName())
-          .append("'");
-      output.append('\n');
-      output
-          .append("wget -O- ")
-          .append(urlZ)
-          .append(" | gunzip > '")
-          .append(file.getName())
-          .append("'");
-      output.append('\n');
+      server.createContext("/", new HttpHandlerWebInfoPage(outputString));
+      server.createContext("/dl", new HttpHandlerServeFilesTar(files, command.includeVcsFiles));
     }
-
-    String outputString = output.toString();
-    System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
-
-    HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
-    server.createContext("/", new HttpHandlerWebInfoPage(outputString));
-    server.createContext(
-        "/dl",
-        isFolder
-            ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
-            : new HttpHandlerServeFile(file));
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -131,14 +160,17 @@ public class Serv {
     if (argList.isEmpty()) {
       throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
     }
+    Set<File> files = new HashSet<>();
+      for (int i = 0; i < argList.size(); i++) {
+        File file = new File(argList.get(i));
 
-    File file = new File(argList.get(0));
-    if (!file.exists()) {
-      throw printHelpAndExit("File/folder doesn't exist", options);
-    }
-
+        if (!file.exists()) {
+          throw printHelpAndExit("File/folder doesn't exist", options);
+        }
+        files.add(file);
+      }
     return new Command(
-        file,
+        files,
         cmd.getOptionValue(host.getLongOpt()),
         Integer.parseInt(cmd.getOptionValue(port.getLongOpt(), "" + Constants.DEFAULT_PORT)),
         cmd.hasOption(includeVcsFiles.getLongOpt()));
