@@ -20,16 +20,14 @@ public class Serv {
 
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     String urlRoot = "http://" + serveIp + ":" + command.servePort + "/";
-    String url = urlRoot + "dl";
-    String urlZ = url + "?z";
     Set<File> files = command.files;
     String outputString;
 
     File file = files.iterator().next();
     if (files.size() == 1 && !file.isDirectory()) {
-      outputString = getOutputStringForOneFileDownload(url, urlZ, file.getName());
+      outputString = getOutputStringForOneFileDownload(urlRoot, file.getName());
     } else {
-      outputString = getOutputStringForMultipleFilesDownload(url, urlZ);
+      outputString = getOutputStringForMultipleFilesDownload(urlRoot);
     }
 
     System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
@@ -118,7 +116,9 @@ public class Serv {
     return new IllegalStateException();
   }
 
-  private static String getOutputStringForMultipleFilesDownload(String url, String urlZ) {
+  private static String getOutputStringForMultipleFilesDownload(String urlRoot) {
+    String url = urlRoot + "dl";
+    String urlZ = url + "?z";
     StringBuilder output = new StringBuilder();
     output.append("To download the files please use one of the commands below.\n");
     output.append("NB! All files will be placed into current folder!\n\n");
@@ -141,7 +141,9 @@ public class Serv {
     return output;
   }
 
-  private static String getOutputStringForOneFileDownload(String url, String urlZ, String fileName) {
+  private static String getOutputStringForOneFileDownload(String urlRoot, String fileName) {
+    String url = urlRoot + "dl";
+    String urlZ = url + "?z";
     StringBuilder output = new StringBuilder();
     output.append("To download the file please use one of the commands below:\n\n");
 
