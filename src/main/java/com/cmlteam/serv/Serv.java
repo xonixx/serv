@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.cli.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Set;
@@ -98,8 +99,12 @@ public class Serv {
           if (!file.exists()) {
             throw printHelpAndExit("File/folder doesn't exist", options);
           }
-          return file;
-    }).collect(Collectors.toSet());
+          try {
+            return file.getCanonicalFile();
+          } catch (IOException e) {
+            throw printHelpAndExit("File/folder path cannot be converted to canonical view", options);
+          }
+        }).collect(Collectors.toSet());
 
     return new Command(
         files,
