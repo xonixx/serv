@@ -5,9 +5,9 @@ import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Serv {
 
@@ -15,6 +15,8 @@ public class Serv {
       Constants.UTILITY_NAME + " [...options] <file or folder>";
 
   public static void main(String[] args) throws Exception {
+    String currentDirectory = System.getProperty("user.dir");
+    System.out.println("The current working directory is " + currentDirectory);
 
     Command command = parseCommandFromArgs(args);
 
@@ -90,14 +92,14 @@ public class Serv {
       throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
     }
 
-    Set<File> files = new HashSet<>();
-    argList.forEach(argument -> {
-      File file = new File(argument);
-      if (!file.exists()) {
-        throw printHelpAndExit("File/folder doesn't exist", options);
-      }
-      files.add(file);
-    });
+    Set<File> files = argList.stream().map (
+        argument -> {
+          File file = new File(argument);
+          if (!file.exists()) {
+            throw printHelpAndExit("File/folder doesn't exist", options);
+          }
+          return file;
+    }).collect(Collectors.toSet());
 
     return new Command(
         files,
@@ -119,17 +121,15 @@ public class Serv {
   private static String getOutputStringForMultipleFilesDownload(String urlRoot) {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
-    StringBuilder output = new StringBuilder();
-    output.append("To download the files please use one of the commands below.\n");
-    output.append("NB! All files will be placed into current folder!\n\n");
 
     String extractPart = " | tar -xvf -";
-    output.append(getOutputStringByUrlAndExtractPart(url, extractPart));
 
     String extractPartZ = " | tar -xzvf -";
-    output.append(getOutputStringByUrlAndExtractPart(urlZ, extractPartZ));
 
-    return output.toString();
+    return "To download the files please use one of the commands below.\n" +
+        "NB! All files will be placed into current folder!\n\n" +
+        getOutputStringByUrlAndExtractPart(url, extractPart) +
+        getOutputStringByUrlAndExtractPart(urlZ, extractPartZ);
   }
 
   private static StringBuilder getOutputStringByUrlAndExtractPart(String url, String extractPart) {
@@ -144,29 +144,24 @@ public class Serv {
   private static String getOutputStringForOneFileDownload(String urlRoot, String fileName) {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
-    StringBuilder output = new StringBuilder();
-    output.append("To download the file please use one of the commands below:\n\n");
 
-    output.append("curl ").append(url).append(" > '").append(fileName).append("'");
-    output.append('\n');
-    output.append("wget -O- ").append(url).append(" > '").append(fileName).append("'");
-    output.append('\n');
-
-    output
-        .append("curl ")
-        .append(urlZ)
-        .append(" --compressed > '")
-        .append(fileName)
-        .append("'");
-    output.append('\n');
-    output
-        .append("wget -O- ")
-        .append(urlZ)
-        .append(" | gunzip > '")
-        .append(fileName)
-        .append("'");
-    output.append('\n');
-    return output.toString();
+    return  "To download the file please use one of the commands below:\n\n" +
+        "curl " + url + " > '" + fileName + "'" +
+        '\n' +
+        "wget -O- " + url + " > '" + fileName + "'" +
+        '\n' +
+        "curl " +
+        urlZ +
+        " --compressed > '" +
+        fileName +
+        "'" +
+        '\n' +
+        "wget -O- " +
+        urlZ +
+        " | gunzip > '" +
+        fileName +
+        "'" +
+        '\n';
   }
 
   private static HttpServer createServerWithContext(Command command, String outputString, Set<File> files) throws Exception {
