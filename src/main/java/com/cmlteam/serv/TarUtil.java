@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
 
 class TarUtil {
 
@@ -16,15 +17,14 @@ class TarUtil {
 
   /**
    * @param outputStream output stream to write to
-   * @param folder folder to compress
+   * @param files files to compress
    * @param tarOptions tar compression options
    * @throws IOException in case of IO exception
    */
-  static void compress(OutputStream outputStream, File folder, TarOptions tarOptions)
+  static void compress(OutputStream outputStream, File[] files, TarOptions tarOptions)
       throws IOException {
     try (TarArchiveOutputStream out =
-        getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
-      File[] files = folder.listFiles();
+             getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
       if (files != null) {
         for (File file : files) {
           addToArchiveCompression(out, file, "", tarOptions);
