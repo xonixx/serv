@@ -5,13 +5,12 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Set;
 
 class HttpHandlerServeFilesTar extends HttpHandlerBase {
-  private final Set<File> files;
+  private final File[] files;
   private final boolean includeVcsFiles;
 
-  HttpHandlerServeFilesTar(Set<File> files, boolean includeVcsFiles) {
+  HttpHandlerServeFilesTar(File[] files, boolean includeVcsFiles) {
     this.files = files;
     this.includeVcsFiles = includeVcsFiles;
   }
@@ -30,7 +29,7 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
     OutputStream os = httpExchange.getResponseBody();
 
     TarUtil.compress(
-        os, files.toArray(new File[0]), TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
+        os, files, TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
     os.flush();
     os.close();
   }

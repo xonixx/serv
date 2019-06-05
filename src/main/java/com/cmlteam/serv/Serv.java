@@ -178,9 +178,9 @@ public class Serv {
       server.createContext(
           "/dl",
           file.isDirectory()
-              ? new HttpHandlerServeFolderTar(file, command.includeVcsFiles)
+              ? new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles)
               : new HttpHandlerServeFile(file));
-    } else server.createContext("/dl", new HttpHandlerServeFilesTar(files, command.includeVcsFiles));
+    } else server.createContext("/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
     return server;
   }
 }
