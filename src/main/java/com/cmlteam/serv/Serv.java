@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class Serv {
 
   private static final String UTILITY_HELP_LINE =
-      Constants.UTILITY_NAME + " [...options] <file or folder>";
+      Constants.UTILITY_NAME + " [...options] <file or folder> [...<file or folder>]";
 
   public static void main(String[] args) throws Exception {
     String currentDirectory = System.getProperty("user.dir");
