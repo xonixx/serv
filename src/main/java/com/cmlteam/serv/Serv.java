@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Serv {
+import static com.cmlteam.serv.HelpMessageGenerator.UTILITY_HELP_LINE;
+import static com.cmlteam.serv.HelpMessageGenerator.getOutputStringForMultipleFilesDownload;
+import static com.cmlteam.serv.HelpMessageGenerator.getOutputStringForOneFileDownload;
+import static com.cmlteam.serv.HelpMessageGenerator.printHelpAndExit;
 
-  private static final String UTILITY_HELP_LINE =
-      Constants.UTILITY_NAME + " [...options] <file or folder> [...<file or folder>]";
+public class Serv {
 
   public static void main(String[] args) throws Exception {
     String currentDirectory = System.getProperty("user.dir");
@@ -93,7 +95,7 @@ public class Serv {
       throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
     }
 
-    Set<File> files = argList.stream().map (
+    Set<File> files = argList.stream().map(
         argument -> {
           File file = new File(argument);
           if (!file.exists()) {
@@ -113,62 +115,6 @@ public class Serv {
         cmd.hasOption(includeVcsFiles.getLongOpt()));
   }
 
-  private static IllegalStateException printHelpAndExit(String message, Options options) {
-    if (message != null) {
-      System.err.println(message);
-    }
-    HelpFormatter formatter = new HelpFormatter();
-    formatter.printHelp(UTILITY_HELP_LINE, options);
-    System.exit(1);
-    return new IllegalStateException();
-  }
-
-  private static String getOutputStringForMultipleFilesDownload(String urlRoot) {
-    String url = urlRoot + "dl";
-    String urlZ = url + "?z";
-
-    String extractPart = " | tar -xvf -";
-
-    String extractPartZ = " | tar -xzvf -";
-
-    return "To download the files please use one of the commands below.\n" +
-        "NB! All files will be placed into current folder!\n\n" +
-        getOutputStringByUrlAndExtractPart(url, extractPart) +
-        getOutputStringByUrlAndExtractPart(urlZ, extractPartZ);
-  }
-
-  private static StringBuilder getOutputStringByUrlAndExtractPart(String url, String extractPart) {
-    StringBuilder output = new StringBuilder();
-    output.append("curl ").append(url).append(extractPart);
-    output.append('\n');
-    output.append("wget -O- ").append(url).append(extractPart);
-    output.append('\n');
-    return output;
-  }
-
-  private static String getOutputStringForOneFileDownload(String urlRoot, String fileName) {
-    String url = urlRoot + "dl";
-    String urlZ = url + "?z";
-
-    return  "To download the file please use one of the commands below:\n\n" +
-        "curl " + url + " > '" + fileName + "'" +
-        '\n' +
-        "wget -O- " + url + " > '" + fileName + "'" +
-        '\n' +
-        "curl " +
-        urlZ +
-        " --compressed > '" +
-        fileName +
-        "'" +
-        '\n' +
-        "wget -O- " +
-        urlZ +
-        " | gunzip > '" +
-        fileName +
-        "'" +
-        '\n';
-  }
-
   private static HttpServer createServerWithContext(Command command, String outputString, Set<File> files) throws Exception {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
@@ -180,7 +126,8 @@ public class Serv {
           file.isDirectory()
               ? new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles)
               : new HttpHandlerServeFile(file));
-    } else server.createContext("/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
+    } else
+      server.createContext("/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
     return server;
   }
 }
