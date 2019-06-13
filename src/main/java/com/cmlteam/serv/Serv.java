@@ -119,15 +119,18 @@ public class Serv {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext("/", new HttpHandlerWebInfoPage(outputString));
-    if (files.size() == 1) {
+        if (files.size() == 1) {
       File file = files.iterator().next();
-      server.createContext(
-          "/dl",
-          file.isDirectory()
-              ? new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles)
-              : new HttpHandlerServeFile(file));
-    } else
+      if (file.isDirectory()){
+        server.createContext("/dl", new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles));
+        server.createContext("/listing", new HttpHandlerFilesList(file.listFiles()));
+      }
+      else server.createContext(
+              "/dl", new HttpHandlerServeFile(file));
+    } else {
       server.createContext("/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
+      server.createContext("/listing", new HttpHandlerFilesList(files.toArray(new File[0])));
+    }
     return server;
   }
 }
