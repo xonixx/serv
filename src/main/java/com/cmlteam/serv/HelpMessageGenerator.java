@@ -21,6 +21,7 @@ class HelpMessageGenerator {
   static String getOutputStringForMultipleFilesDownload(String urlRoot) {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
+    String listUrl = urlRoot + "listing";
 
     String extractPart = " | tar -xvf -";
 
@@ -29,7 +30,8 @@ class HelpMessageGenerator {
     return "To download the files please use one of the commands below.\n" +
         "NB! All files will be placed into current folder!\n\n" +
         getOutputStringByUrlAndExtractPart(url, extractPart) +
-        getOutputStringByUrlAndExtractPart(urlZ, extractPartZ);
+        getOutputStringByUrlAndExtractPart(urlZ, extractPartZ) +
+            "To see the list of files use the URL below.\n" + listUrl;
   }
 
   private static StringBuilder getOutputStringByUrlAndExtractPart(String url, String extractPart) {
