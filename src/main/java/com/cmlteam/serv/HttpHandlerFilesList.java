@@ -6,27 +6,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class HttpHandlerFilesList extends HttpHandlerBase {
 
     private final File[] files;
-    private Deque<String> referers = new ArrayDeque<>();
 
-    private String[] HEADER = {"<h1>Files List</h1>",
-            "<br></br>",
-            "<a href='/listing?name=back'>Go to upper level</a>",
-            "<br></br>",
-            "<table>",
-                "<thead>",
-                    "<tr>",
-                        "<th>File or Folder Name</th>",
-                        "<th>Size</th>",
-                    "</tr>",
-                "</thead>",
-            "<tbody>"};
     private final String[] FOOTER = {"</tbody>",
-                                "</table>"
+            "</table>"
     };
 
     public HttpHandlerFilesList(File[] files) {
@@ -41,33 +31,22 @@ public class HttpHandlerFilesList extends HttpHandlerBase {
         OutputStream os = httpExchange.getResponseBody();
         String param = findRequestParam(httpExchange.getRequestURI().toString());
         File nextFolder;
-        switch (param) {
-            case "toplevel":
-                showList(files, os);
-                break;
-            case "back":
-                if (referers.size() < 2) {
-                    referers.clear();
-                    showList(files, os);
-                } else {
-                    referers.pop();
-                    nextFolder = new File (referers.peek());
-                    showList(nextFolder.listFiles(), os);
-                }
-                break;
-            default:
-                referers.push(param);
-                nextFolder = new File(param);
+        if ("toplevel".equals(param)) {
+            showList(files, os);
+        } else {
+            nextFolder = new File(param);
+            if (isValid(nextFolder)) {
                 showList(nextFolder.listFiles(), os);
+            } else {
+                showList(files, os);
+            }
         }
         os.flush();
         os.close();
     }
 
     private void showList(File[] folder, OutputStream os) throws IOException{
-        for (String s: HEADER) {
-            os.write(s.getBytes(StandardCharsets.UTF_8));
-        }
+        writeHeaderWithBackLink(os, folder[0]);
         for (File file: folder) {
             if (file.isDirectory()) {
                 writeClickableFolderName(os, file);
@@ -88,34 +67,72 @@ public class HttpHandlerFilesList extends HttpHandlerBase {
         double dsize = file.length()/1000;
         String size = String.format("%5.2f", dsize) + "KB";
         String[] content = {"<tr>",
-                                "<td>" + name + "</td>",
-                                "<td>" + size + "</td>",
-                            "</tr>"
+                "<td>" + name + "</td>",
+                "<td>" + size + "</td>",
+                "</tr>"
         };
         for (String s: content) {
             os.write(s.getBytes(StandardCharsets.UTF_8));
         }
     }
 
-    private void writeClickableFolderName (OutputStream os, File file) throws IOException{
+    private void writeClickableFolderName (OutputStream os, File file) throws IOException {
         String name = file.getName();
         String convertedName = file.getAbsolutePath().replace("\\", "$" );
         String[] content = {"<tr>",
-                                "<td><a href='/listing?name=" + convertedName + "'>" + name + "</a></td>",
-                                "<td>---</td>",
-                            "</tr>"
+                "<td><a href='/listing?name=" + convertedName + "'>" + name + "</a></td>",
+                "<td>---</td>",
+                "</tr>"
         };
+        for (String s: content) {
+            os.write(s.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private void writeHeaderWithBackLink (OutputStream os, File file) throws IOException {
+        String url = file.getParentFile().getParentFile().getAbsolutePath().replace("\\", "$");
+        String content[] = {"<h1>Files List</h1>",
+                "<br></br>",
+                "<a href='/listing?name=" + url + "'>Go to upper level</a>",
+                "<br></br>",
+                "<table>",
+                "<thead>",
+                "<tr>",
+                "<th>File or Folder Name</th>",
+                "<th>Size</th>",
+                "</tr>",
+                "</thead>",
+                "<tbody>"};
         for (String s: content) {
             os.write(s.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     private String findRequestParam (String url) {
-        StringTokenizer st = new StringTokenizer(url, "=");
-        if (st.countTokens() >=2) {
-            st.nextToken();
-            return st.nextToken().replace("$", "\\").replace("%20", " ");
+        if  (url.contains("?")) {
+            String param = url.substring(url.indexOf("=") + 1);
+            return param.replace("$", "\\").replace("%20", " ");
         }
         return "toplevel";
     }
+
+    private boolean isValid (File file) {
+        Path pathToCheck = file.toPath();
+        if (!Files.exists(pathToCheck)) {
+            return false;
+        }
+        // startsWith?
+        for (File f: files) {
+            Path rootDir = f.toPath().getParent();
+            while (pathToCheck != null) {
+                if (rootDir.equals(pathToCheck)) {
+                    return true;
+                } else {
+                    pathToCheck = pathToCheck.getParent();
+                }
+            }
+        }
+        return false;
+    }
 }
+
