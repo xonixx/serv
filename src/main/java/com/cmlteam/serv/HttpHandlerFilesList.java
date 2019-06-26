@@ -8,8 +8,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 public class HttpHandlerFilesList extends HttpHandlerBase {
 
@@ -64,8 +62,19 @@ public class HttpHandlerFilesList extends HttpHandlerBase {
 
     private void writeNonClickableFileName (OutputStream os, File file) throws IOException{
         String name = file.getName();
-        double dsize = file.length()/1000;
-        String size = String.format("%5.2f", dsize) + "KB";
+        String size = "";
+        if (file.length() < 1000) {
+            size = file.length() + " B";
+        } else if (file.length() < 1000000) {
+            double dsize = file.length() / 1000;
+            size = String.format("%5.2f", dsize) + " KB";
+        } else if (file.length() < 1000000000) {
+            double dsize = file.length() / 1000000;
+            size = String.format("%5.2f", dsize) + " MB";
+        } else {
+            double dsize = file.length() / 1000000000;
+            size = String.format("%5.2f", dsize) + " GB";
+        }
         String[] content = {"<tr>",
                 "<td>" + name + "</td>",
                 "<td>" + size + "</td>",
