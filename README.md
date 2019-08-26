@@ -37,7 +37,7 @@ Help message:
 ```
 $ serv -h
 serv ver. 0.2.0
-usage: serv [...options] <file or folder>
+usage: serv [...options] <file or folder> [...<file or folder>]
  -H,--host <arg>    host to serve on (default is determined automatically)
  -h,--help          print help and exit
     --include-vcs   include VCS files (default = false)
