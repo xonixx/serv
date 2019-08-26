@@ -1,6 +1,7 @@
 package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpServer;
+import lombok.SneakyThrows;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -10,11 +11,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.cmlteam.serv.HelpMessageGenerator.*;
+import static com.cmlteam.serv.HelpMessageGenerator.UTILITY_HELP_LINE;
 
 public class Serv {
 
-  public static void main(String[] args) throws Exception {
+  private final HelpMessageGenerator helpMessageGenerator = new HelpMessageGenerator();
+
+  public Serv(String[] args) {
     Command command = parseCommandFromArgs(args);
 
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
@@ -24,9 +27,10 @@ public class Serv {
 
     File file = files.iterator().next();
     if (files.size() == 1 && !file.isDirectory()) {
-      outputString = getOutputStringForOneFileDownload(urlRoot, file.getName());
+      outputString =
+          helpMessageGenerator.getOutputStringForOneFileDownload(urlRoot, file.getName());
     } else {
-      outputString = getOutputStringForMultipleFilesDownload(urlRoot);
+      outputString = helpMessageGenerator.getOutputStringForMultipleFilesDownload(urlRoot);
     }
 
     System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
@@ -35,7 +39,11 @@ public class Serv {
     server.start();
   }
 
-  private static Command parseCommandFromArgs(String[] args) {
+  public static void main(String[] args) {
+    new Serv(args);
+  }
+
+  private Command parseCommandFromArgs(String[] args) {
     Options options = new Options();
 
     Option host =
@@ -68,7 +76,7 @@ public class Serv {
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      throw printHelpAndExit(e.getMessage(), options);
+      throw helpMessageGenerator.printHelpAndExit(e.getMessage(), options);
     }
 
     if (cmd.hasOption(help.getLongOpt())) {
@@ -86,7 +94,8 @@ public class Serv {
     List<String> argList = cmd.getArgList();
 
     if (argList.isEmpty()) {
-      throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
+      throw helpMessageGenerator.printHelpAndExit(
+          "Provide at least 1 file/folder to serve", options);
     }
 
     Set<File> files =
@@ -95,12 +104,13 @@ public class Serv {
                 argument -> {
                   File file = new File(argument);
                   if (!file.exists()) {
-                    throw printHelpAndExit("File/folder doesn't exist", options);
+                    throw helpMessageGenerator.printHelpAndExit(
+                        "File/folder doesn't exist", options);
                   }
                   try {
                     return file.getCanonicalFile();
                   } catch (IOException e) {
-                    throw printHelpAndExit(
+                    throw helpMessageGenerator.printHelpAndExit(
                         "File/folder path cannot be converted to canonical view", options);
                   }
                 })
@@ -113,8 +123,9 @@ public class Serv {
         cmd.hasOption(includeVcsFiles.getLongOpt()));
   }
 
-  private static HttpServer createServerWithContext(
-      Command command, String outputString, Set<File> files) throws Exception {
+  @SneakyThrows
+  private HttpServer createServerWithContext(
+      Command command, String outputString, Set<File> files) {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext("/", new HttpHandlerWebInfoPage(outputString));

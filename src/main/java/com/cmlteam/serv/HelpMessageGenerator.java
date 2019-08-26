@@ -8,7 +8,7 @@ class HelpMessageGenerator {
   static final String UTILITY_HELP_LINE =
       Constants.UTILITY_NAME + " [...options] <file or folder> [...<file or folder>]";
 
-  static IllegalStateException printHelpAndExit(String message, Options options) {
+  IllegalStateException printHelpAndExit(String message, Options options) {
     if (message != null) {
       System.err.println(message);
     }
@@ -18,7 +18,7 @@ class HelpMessageGenerator {
     return new IllegalStateException();
   }
 
-  static String getOutputStringForMultipleFilesDownload(String urlRoot) {
+  String getOutputStringForMultipleFilesDownload(String urlRoot) {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
 
@@ -26,10 +26,10 @@ class HelpMessageGenerator {
 
     String extractPartZ = " | tar -xzvf -";
 
-    return "To download the files please use one of the commands below.\n" +
-        "NB! All files will be placed into current folder!\n\n" +
-        getOutputStringByUrlAndExtractPart(url, extractPart) +
-        getOutputStringByUrlAndExtractPart(urlZ, extractPartZ);
+    return "To download the files please use one of the commands below.\n"
+        + "NB! All files will be placed into current folder!\n\n"
+        + getOutputStringByUrlAndExtractPart(url, extractPart)
+        + getOutputStringByUrlAndExtractPart(urlZ, extractPartZ);
   }
 
   private static StringBuilder getOutputStringByUrlAndExtractPart(String url, String extractPart) {
@@ -41,26 +41,34 @@ class HelpMessageGenerator {
     return output;
   }
 
-  static String getOutputStringForOneFileDownload(String urlRoot, String fileName) {
+  String getOutputStringForOneFileDownload(String urlRoot, String fileName) {
     String url = urlRoot + "dl";
     String urlZ = url + "?z";
 
-    return "To download the file please use one of the commands below:\n\n" +
-        "curl " + url + " > '" + fileName + "'" +
-        '\n' +
-        "wget -O- " + url + " > '" + fileName + "'" +
-        '\n' +
-        "curl " +
-        urlZ +
-        " --compressed > '" +
-        fileName +
-        "'" +
-        '\n' +
-        "wget -O- " +
-        urlZ +
-        " | gunzip > '" +
-        fileName +
-        "'" +
-        '\n';
+    return "To download the file please use one of the commands below:\n\n"
+        + "curl "
+        + url
+        + " > '"
+        + fileName
+        + "'"
+        + '\n'
+        + "wget -O- "
+        + url
+        + " > '"
+        + fileName
+        + "'"
+        + '\n'
+        + "curl "
+        + urlZ
+        + " --compressed > '"
+        + fileName
+        + "'"
+        + '\n'
+        + "wget -O- "
+        + urlZ
+        + " | gunzip > '"
+        + fileName
+        + "'"
+        + '\n';
   }
 }

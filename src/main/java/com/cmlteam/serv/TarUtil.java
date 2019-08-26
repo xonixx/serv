@@ -23,7 +23,7 @@ class TarUtil {
   static void compress(OutputStream outputStream, File[] files, TarOptions tarOptions)
       throws IOException {
     try (TarArchiveOutputStream out =
-             getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
+        getTarArchiveOutputStream(outputStream, tarOptions.isCompress())) {
       if (files != null) {
         for (File file : files) {
           addToArchiveCompression(out, file, "", tarOptions);
