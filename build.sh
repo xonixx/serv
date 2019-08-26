@@ -3,11 +3,16 @@
 set -e
 #set -x
 
-GRAAL=~/soft/graalvm-ce-19.0.0
+GRAAL=~/soft/graalvm-ce-19.2.0
 UPX=~/soft/upx-3.95-amd64_linux
 
 mvn clean compile
 CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
+
+if [[ ! -d ./build ]]
+then
+    mkdir ./build
+fi
 
 cd ./build/
 

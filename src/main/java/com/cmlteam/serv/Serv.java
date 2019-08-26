@@ -10,17 +10,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.cmlteam.serv.HelpMessageGenerator.UTILITY_HELP_LINE;
-import static com.cmlteam.serv.HelpMessageGenerator.getOutputStringForMultipleFilesDownload;
-import static com.cmlteam.serv.HelpMessageGenerator.getOutputStringForOneFileDownload;
-import static com.cmlteam.serv.HelpMessageGenerator.printHelpAndExit;
+import static com.cmlteam.serv.HelpMessageGenerator.*;
 
 public class Serv {
 
   public static void main(String[] args) throws Exception {
-    String currentDirectory = System.getProperty("user.dir");
-    System.out.println("The current working directory is " + currentDirectory);
-
     Command command = parseCommandFromArgs(args);
 
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
@@ -95,18 +89,22 @@ public class Serv {
       throw printHelpAndExit("Provide at least 1 file/folder to serve", options);
     }
 
-    Set<File> files = argList.stream().map(
-        argument -> {
-          File file = new File(argument);
-          if (!file.exists()) {
-            throw printHelpAndExit("File/folder doesn't exist", options);
-          }
-          try {
-            return file.getCanonicalFile();
-          } catch (IOException e) {
-            throw printHelpAndExit("File/folder path cannot be converted to canonical view", options);
-          }
-        }).collect(Collectors.toSet());
+    Set<File> files =
+        argList.stream()
+            .map(
+                argument -> {
+                  File file = new File(argument);
+                  if (!file.exists()) {
+                    throw printHelpAndExit("File/folder doesn't exist", options);
+                  }
+                  try {
+                    return file.getCanonicalFile();
+                  } catch (IOException e) {
+                    throw printHelpAndExit(
+                        "File/folder path cannot be converted to canonical view", options);
+                  }
+                })
+            .collect(Collectors.toSet());
 
     return new Command(
         files,
@@ -115,7 +113,8 @@ public class Serv {
         cmd.hasOption(includeVcsFiles.getLongOpt()));
   }
 
-  private static HttpServer createServerWithContext(Command command, String outputString, Set<File> files) throws Exception {
+  private static HttpServer createServerWithContext(
+      Command command, String outputString, Set<File> files) throws Exception {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext("/", new HttpHandlerWebInfoPage(outputString));
@@ -127,7 +126,8 @@ public class Serv {
               ? new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles)
               : new HttpHandlerServeFile(file));
     } else
-      server.createContext("/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
+      server.createContext(
+          "/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
     return server;
   }
 }
