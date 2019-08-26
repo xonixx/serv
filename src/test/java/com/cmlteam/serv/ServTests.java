@@ -75,6 +75,15 @@ class ServTests {
 
   @Test
   void testServeFolderUncompressed(@TempDir Path tempDir) throws IOException {
+    testServeFolder(false, tempDir);
+  }
+
+  @Test
+  void testServeFolderCompressed(@TempDir Path tempDir) throws IOException {
+    testServeFolder(true, tempDir);
+  }
+
+  void testServeFolder(boolean isGz, Path tempDir) throws IOException {
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
     String fname1 = "file1.txt";
@@ -92,10 +101,16 @@ class ServTests {
 
     ReadableByteChannel readableByteChannel =
         Channels.newChannel(
-            new URL("http://" + address.getHostName() + ":" + address.getPort() + "/dl")
+            new URL(
+                    "http://"
+                        + address.getHostName()
+                        + ":"
+                        + address.getPort()
+                        + "/dl"
+                        + (isGz ? "?z" : ""))
                 .openStream());
 
-    File resultFile = tempDir.resolve("input_folder_result.tar").toFile();
+    File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
     FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
     fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
 
