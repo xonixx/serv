@@ -128,6 +128,69 @@ class ServTests {
     serv.stop();
   }
 
+  @Test
+  void testServeFileSetUncompressed(@TempDir Path tempDir) throws IOException {
+    testServeFolder(false, tempDir);
+  }
+
+  @Test
+  void testServeFileSetCompressed(@TempDir Path tempDir) throws IOException {
+    testServeFolder(true, tempDir);
+  }
+
+  void testServeFileSet(boolean isGz, Path tempDir) throws IOException {
+    Path inputFolder = createTestFolder(tempDir, "input_folder");
+
+    String fname1 = "file1.txt";
+    String fname2 = "file2.txt";
+    String fname3 = "file3";
+    String fname4 = "FiLe4.html";
+
+    Path file1 = createTestFile(inputFolder, fname1, "hello world 123");
+    Path file2 = createTestFile(inputFolder, fname2, "");
+    Path file3 =
+        createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
+    Path file4 = createTestFile(inputFolder, fname4, "<h1>Hello</h1>");
+
+    Serv serv =
+        new Serv(
+            new String[] {
+              file1.toFile().getAbsolutePath(),
+              file2.toFile().getAbsolutePath(),
+              file3.toFile().getAbsolutePath()
+            });
+
+    InetSocketAddress address = serv.getAddress();
+
+    ReadableByteChannel readableByteChannel =
+        Channels.newChannel(
+            new URL(
+                    "http://"
+                        + address.getHostName()
+                        + ":"
+                        + address.getPort()
+                        + "/dl"
+                        + (isGz ? "?z" : ""))
+                .openStream());
+
+    File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
+    FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
+    fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+
+    Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
+
+    FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
+
+    assertFilesEqual(file1, resultExtractedFolder.resolve(fname1));
+    assertFilesEqual(file2, resultExtractedFolder.resolve(fname2));
+    assertFilesEqual(file3, resultExtractedFolder.resolve(fname3));
+    String[] list = resultExtractedFolder.toFile().list();
+    assertNotNull(list);
+    assertEquals(3, list.length, "number of files should be same");
+
+    serv.stop();
+  }
+
   private Path createTestFile(Path folder, String name, String content) throws IOException {
     Path file = folder.resolve(name);
     Files.write(file, content.getBytes(StandardCharsets.UTF_8));
