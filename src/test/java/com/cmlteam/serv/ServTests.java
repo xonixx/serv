@@ -130,12 +130,12 @@ class ServTests {
 
   @Test
   void testServeFileSetUncompressed(@TempDir Path tempDir) throws IOException {
-    testServeFolder(false, tempDir);
+    testServeFileSet(false, tempDir);
   }
 
   @Test
   void testServeFileSetCompressed(@TempDir Path tempDir) throws IOException {
-    testServeFolder(true, tempDir);
+    testServeFileSet(true, tempDir);
   }
 
   void testServeFileSet(boolean isGz, Path tempDir) throws IOException {
