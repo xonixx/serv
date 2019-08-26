@@ -26,11 +26,14 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
             "attachment; filename=\"files.tar" + (isCompress ? ".gz" : "") + "\"");
     httpExchange.sendResponseHeaders(200, 0);
 
-    OutputStream os = httpExchange.getResponseBody();
+    try (OutputStream os = httpExchange.getResponseBody()) {
+      TarUtil.compress(
+          os,
+          files,
+          TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
+      os.flush();
+    }
 
-    TarUtil.compress(
-        os, files, TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
-    os.flush();
-    os.close();
+    httpExchange.close();
   }
 }

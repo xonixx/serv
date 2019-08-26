@@ -17,18 +17,19 @@ public class HttpHandlerWebInfoPage extends HttpHandlerBase {
   public void handle(HttpExchange httpExchange) throws IOException {
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     httpExchange.sendResponseHeaders(200, 0);
-    OutputStream responseBody = httpExchange.getResponseBody();
-    String[] strings = {
-      "<pre><code>",
-      outputString,
-      "</pre></code><hr><a target='_blank' href='",
-      Constants.GITHUB + "'>",
-      Constants.UTILITY_NAME + " " + Constants.VERSION + "</a>"
-    };
-    for (String string : strings) {
-      responseBody.write(string.getBytes(StandardCharsets.UTF_8));
+    try (OutputStream responseBody = httpExchange.getResponseBody()) {
+      String[] strings = {
+        "<pre><code>",
+        outputString,
+        "</pre></code><hr><a target='_blank' href='",
+        Constants.GITHUB + "'>",
+        Constants.UTILITY_NAME + " " + Constants.VERSION + "</a>"
+      };
+      for (String string : strings) {
+        responseBody.write(string.getBytes(StandardCharsets.UTF_8));
+      }
+      responseBody.flush();
     }
-    responseBody.flush();
     httpExchange.close();
   }
 }

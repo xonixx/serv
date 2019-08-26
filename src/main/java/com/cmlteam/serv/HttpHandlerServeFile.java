@@ -29,13 +29,15 @@ class HttpHandlerServeFile extends HttpHandlerBase {
         .getResponseHeaders()
         .add("Content-Disposition", "attachment; filename=\"" + escapeFileName(file) + "\"");
     httpExchange.sendResponseHeaders(200, 0);
-    OutputStream outputStream = httpExchange.getResponseBody();
+    OutputStream _outputStream = httpExchange.getResponseBody();
     Path path = file.toPath();
     if (isCompress) {
-      outputStream = new GzipCompressorOutputStream(outputStream);
+      _outputStream = new GzipCompressorOutputStream(_outputStream);
     }
-    Files.copy(path, outputStream);
-    outputStream.flush();
-    outputStream.close();
+    try (OutputStream outputStream = _outputStream) {
+      Files.copy(path, outputStream);
+      outputStream.flush();
+    }
+    httpExchange.close();
   }
 }
