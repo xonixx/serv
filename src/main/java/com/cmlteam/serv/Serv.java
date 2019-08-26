@@ -16,6 +16,7 @@ import static com.cmlteam.serv.HelpMessageGenerator.UTILITY_HELP_LINE;
 public class Serv {
 
   private final HelpMessageGenerator helpMessageGenerator = new HelpMessageGenerator();
+  private final HttpServer server;
 
   public Serv(String[] args) {
     Command command = parseCommandFromArgs(args);
@@ -34,9 +35,17 @@ public class Serv {
     }
 
     System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
-    HttpServer server = createServerWithContext(command, outputString, files);
+    server = createServerWithContext(command, outputString, files);
     server.setExecutor(null); // creates a default executor
     server.start();
+  }
+
+  void stop() {
+    server.stop(0);
+  }
+
+  InetSocketAddress getAddress() {
+    return server.getAddress();
   }
 
   public static void main(String[] args) {
