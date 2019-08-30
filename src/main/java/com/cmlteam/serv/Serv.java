@@ -140,14 +140,18 @@ public class Serv {
     server.createContext("/", new HttpHandlerWebInfoPage(outputString));
     if (files.size() == 1) {
       File file = files.iterator().next();
-      server.createContext(
-          "/dl",
-          file.isDirectory()
-              ? new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles)
-              : new HttpHandlerServeFile(file));
-    } else
-      server.createContext(
-          "/dl", new HttpHandlerServeFilesTar(files.toArray(new File[0]), command.includeVcsFiles));
+      if (file.isDirectory()) {
+        server.createContext(
+            "/dl", new HttpHandlerServeFilesTar(file.listFiles(), command.includeVcsFiles));
+        server.createContext("/listing", new HttpHandlerListing(file.listFiles()));
+      } else {
+        server.createContext("/dl", new HttpHandlerServeFile(file));
+      }
+    } else {
+      File[] filesArr = files.toArray(new File[0]);
+      server.createContext("/dl", new HttpHandlerServeFilesTar(filesArr, command.includeVcsFiles));
+      server.createContext("/listing", new HttpHandlerListing(filesArr));
+    }
     return server;
   }
 }

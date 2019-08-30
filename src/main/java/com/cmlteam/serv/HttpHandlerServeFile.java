@@ -37,7 +37,8 @@ class HttpHandlerServeFile extends HttpHandlerBase {
     try (OutputStream outputStream = _outputStream) {
       Files.copy(path, outputStream);
       outputStream.flush();
+    } finally {
+      httpExchange.close();
     }
-    httpExchange.close();
   }
 }

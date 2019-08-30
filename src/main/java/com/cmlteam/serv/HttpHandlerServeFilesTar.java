@@ -32,8 +32,8 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
           files,
           TarOptions.builder().compress(isCompress).excludeVcs(!includeVcsFiles).build());
       os.flush();
+    } finally {
+      httpExchange.close();
     }
-
-    httpExchange.close();
   }
 }
