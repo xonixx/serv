@@ -18,12 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ServTests {
+  private static final String testPort = "18888";
+
   @Test
   void testServeSingleFileUncompressed(@TempDir Path tempDir) throws IOException {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    Serv serv = new Serv(new String[] {inputFile.getAbsolutePath()});
+    Serv serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -47,7 +49,7 @@ class ServTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    Serv serv = new Serv(new String[] {inputFile.getAbsolutePath()});
+    Serv serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -95,7 +97,7 @@ class ServTests {
     Path file3 =
         createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
 
-    Serv serv = new Serv(new String[] {inputFolder.toFile().getAbsolutePath()});
+    Serv serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -155,6 +157,8 @@ class ServTests {
     Serv serv =
         new Serv(
             new String[] {
+              "-p",
+              testPort,
               file1.toFile().getAbsolutePath(),
               file2.toFile().getAbsolutePath(),
               file3.toFile().getAbsolutePath()
