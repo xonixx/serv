@@ -8,24 +8,26 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static lombok.AccessLevel.PACKAGE;
 
-@RequiredArgsConstructor(access = PACKAGE)
 public class HttpHandlerListing extends HttpHandlerBase {
-
-  private final File[] files;
 
   private static final byte[] FOOTER = "</tbody></table>".getBytes(UTF_8);
   private static final byte[] UNABLE_TO_LIST_FILES = "Unable to list files".getBytes(UTF_8);
   private static final byte[] INVALID_FOLDER = "Invalid folder".getBytes(UTF_8);
+
+  private final File[] files;
+
+  HttpHandlerListing(File[] files) {
+    this.files = files;
+  }
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
@@ -33,15 +35,15 @@ public class HttpHandlerListing extends HttpHandlerBase {
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     httpExchange.sendResponseHeaders(200, 0);
     try (OutputStream os = httpExchange.getResponseBody()) {
-      String param = getRequestParamForFolderNameToList(httpExchange.getRequestURI().toString());
-      if (param == null) { // no param = top level
-        showList(files, os);
+      FileRef ref = getRequestedFolderToList(httpExchange.getRequestURI());
+      if (ref == null) { // no ref = top level
+        showList(-1, files, os);
       } else {
-        File nextFolder = new File(param);
+        File nextFolder = ref.resolve();
         if (isValidToAccess(nextFolder)) {
           File[] filesInFolder = nextFolder.listFiles();
           if (filesInFolder != null) {
-            showList(filesInFolder, os);
+            showList(ref.fIdx, filesInFolder, os);
           } else {
             os.write(UNABLE_TO_LIST_FILES);
           }
@@ -50,13 +52,15 @@ public class HttpHandlerListing extends HttpHandlerBase {
         }
       }
       os.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
       httpExchange.close();
     }
   }
 
-  private void showList(File[] files, OutputStream os) throws IOException {
-    writeHeaderWithBackLink(os, files[0]);
+  private void showList(int fIdx, File[] files, OutputStream os) throws IOException {
+    writeHeaderWithBackLink(os, fIdx, files[0]);
     List<File> filesList = Arrays.asList(files);
 
     // TODO human sort
@@ -68,9 +72,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
 
     for (File file : filesList) {
       if (file.isDirectory()) {
-        writeFolderLink(os, file);
+        writeFolderRow(os, fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx, file);
       } else if (file.isFile()) {
-        writeFileName(os, file);
+        writeFileRow(os, file);
       } else {
         System.err.println(file.getName() + " is not supported");
       }
@@ -78,20 +82,20 @@ public class HttpHandlerListing extends HttpHandlerBase {
     os.write(FOOTER);
   }
 
-  private void writeFileName(OutputStream os, File file) throws IOException {
+  private void writeFileRow(OutputStream os, File file) throws IOException {
     String name = file.getName();
     String size = Util.renderFileSize(file.length());
     writeStrings(os, new String[] {"<tr><td>", name, "</td><td>", size, "</td></tr>"});
   }
 
-  private void writeFolderLink(OutputStream os, File file) throws IOException {
+  private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
-    String escapedName = fileNameForLink(file);
+    String escapedName = fileNameForLink(fIdx, file);
     writeStrings(
         os,
         new String[] {
           "<tr>",
-          "<td><a href='/listing?name=",
+          "<td><a href='/listing?f=" + fIdx + "&name=",
           escapedName,
           "'>",
           name,
@@ -102,13 +106,29 @@ public class HttpHandlerListing extends HttpHandlerBase {
   }
 
   @SneakyThrows
-  private String fileNameForLink(File file) {
-    return URLEncoder.encode(file.getAbsolutePath(), UTF_8.name());
+  private String fileNameForLink(int fIdx, File file) {
+    String relativePath = relativePath(fIdx, file);
+    return URLEncoder.encode(relativePath, UTF_8.name());
   }
 
-  private void writeHeaderWithBackLink(OutputStream os, File file) throws IOException {
+  @SneakyThrows
+  private String relativePath(int fIdx, File file) {
+    if (fIdx == -1) {
+      return "/";
+    }
+
+    File root = files[fIdx];
+    return root.toURI().relativize(file.toURI()).getPath();
+  }
+
+  private void writeHeaderWithBackLink(OutputStream os, int fIdx, File file) throws IOException {
+    boolean shouldNotShowUp = fIdx == -1;
     File indexedFolder = file.getParentFile();
-    String parentUrl = fileNameForLink(indexedFolder.getParentFile());
+    String indexedFolderDisplayed =
+        "/" + (fIdx == -1 ? "" : files[fIdx].getName() + "/" + relativePath(fIdx, indexedFolder));
+    File upFile = indexedFolder.getParentFile();
+    String parentUrl = fileNameForLink(fIdx, upFile);
+    boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
     writeStrings(
         os,
         new String[] {
@@ -119,12 +139,13 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "  border: 1px solid #bbb;",
           "}</style>",
           "<h1>Index of ",
-          indexedFolder.getAbsolutePath(),
+          indexedFolderDisplayed,
           "</h1>",
-          "<a href='/listing?name=",
-          parentUrl,
-          "'>↑ UP</a>",
-          "<br></br>",
+          shouldNotShowUp
+              ? ""
+              : "<a href='/listing"
+                  + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
+                  + "'>↑ UP</a><br><br>",
           "<table>",
           "<thead>",
           "<tr>",
@@ -143,12 +164,37 @@ public class HttpHandlerListing extends HttpHandlerBase {
   }
 
   @SneakyThrows
-  private String getRequestParamForFolderNameToList(String url) {
-    if (url.contains("?")) {
-      String param = url.substring(url.indexOf("=") + 1);
-      return URLDecoder.decode(param, UTF_8.name());
+  private FileRef getRequestedFolderToList(URI uri) {
+    Map<String, String> paramsMap = splitQuery(uri);
+    String name = paramsMap.get("name");
+    return name == null ? null : new FileRef(Integer.parseInt(paramsMap.get("f")), name);
+  }
+
+  @RequiredArgsConstructor
+  private class FileRef {
+    private final int fIdx;
+    private final String name;
+
+    File resolve() {
+      return new File(files[fIdx], name);
     }
-    return null;
+  }
+
+  @SneakyThrows
+  private static Map<String, String> splitQuery(URI uri) {
+    String query = uri.getQuery();
+    if (query == null) {
+      return Collections.emptyMap();
+    }
+    Map<String, String> query_pairs = new LinkedHashMap<>();
+    String[] pairs = query.split("&");
+    for (String pair : pairs) {
+      int idx = pair.indexOf("=");
+      query_pairs.put(
+          URLDecoder.decode(pair.substring(0, idx), UTF_8.name()),
+          URLDecoder.decode(pair.substring(idx + 1), UTF_8.name()));
+    }
+    return query_pairs;
   }
 
   private boolean isValidToAccess(File file) {
@@ -156,13 +202,14 @@ public class HttpHandlerListing extends HttpHandlerBase {
     if (!Files.exists(pathToCheck)) {
       return false;
     }
-    for (File f : files) {
-      Path rootDir = f.toPath().getParent();
-      while (pathToCheck != null) {
-        if (rootDir.equals(pathToCheck)) {
+    for (File sharedFile : files) {
+      Path sharedDir = sharedFile.toPath();
+      Path pathToCheckCurrent = pathToCheck;
+      while (pathToCheckCurrent != null) {
+        if (sharedDir.equals(pathToCheckCurrent)) {
           return true;
         } else {
-          pathToCheck = pathToCheck.getParent();
+          pathToCheckCurrent = pathToCheckCurrent.getParent();
         }
       }
     }
