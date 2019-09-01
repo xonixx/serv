@@ -37,13 +37,13 @@ public class HttpHandlerListing extends HttpHandlerBase {
     try (OutputStream os = httpExchange.getResponseBody()) {
       FileRef ref = getRequestedFolderToList(httpExchange.getRequestURI());
       if (ref == null) { // no ref = top level
-        showList(-1, files, os);
+        showList(-1, null, files, os);
       } else {
         File nextFolder = ref.resolve();
         if (isValidToAccess(nextFolder)) {
           File[] filesInFolder = nextFolder.listFiles();
           if (filesInFolder != null) {
-            showList(ref.fIdx, filesInFolder, os);
+            showList(ref.fIdx, nextFolder, filesInFolder, os);
           } else {
             os.write(UNABLE_TO_LIST_FILES);
           }
@@ -59,8 +59,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
     }
   }
 
-  private void showList(int fIdx, File[] files, OutputStream os) throws IOException {
-    writeHeaderWithBackLink(os, fIdx, files[0]);
+  private void showList(int fIdx, File indexedFolder, File[] files, OutputStream os)
+      throws IOException {
+    writeHeaderWithBackLink(os, fIdx, indexedFolder);
     List<File> filesList = Arrays.asList(files);
 
     // TODO human sort
@@ -121,13 +122,17 @@ public class HttpHandlerListing extends HttpHandlerBase {
     return root.toURI().relativize(file.toURI()).getPath();
   }
 
-  private void writeHeaderWithBackLink(OutputStream os, int fIdx, File file) throws IOException {
-    boolean shouldNotShowUp = fIdx == -1;
-    File indexedFolder = file.getParentFile();
+  private void writeHeaderWithBackLink(OutputStream os, int fIdx, File indexedFolder)
+      throws IOException {
+    boolean isRoot = indexedFolder == null;
     String indexedFolderDisplayed =
-        "/" + (fIdx == -1 ? "" : files[fIdx].getName() + "/" + relativePath(fIdx, indexedFolder));
-    File upFile = indexedFolder.getParentFile();
-    String parentUrl = fileNameForLink(fIdx, upFile);
+        "/" + (isRoot ? "" : files[fIdx].getName() + "/" + relativePath(fIdx, indexedFolder));
+
+    String parentUrl = "";
+    if (!isRoot) {
+      File upFile = indexedFolder.getParentFile();
+      parentUrl = fileNameForLink(fIdx, upFile);
+    }
     boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
     writeStrings(
         os,
@@ -141,8 +146,8 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "<h1>Index of ",
           indexedFolderDisplayed,
           "</h1>",
-          shouldNotShowUp
-              ? ""
+          isRoot
+              ? "" /* no up link */
               : "<a href='/listing"
                   + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
                   + "'>↑ UP</a><br><br>",
