@@ -15,6 +15,15 @@ public class HttpHandlerWebInfoPage extends HttpHandlerBase {
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
+    if (!"/".equals(httpExchange.getRequestURI().toString())) {
+      // TODO Handle correctly GET /favicon.ico #20
+      httpExchange.sendResponseHeaders(404, 0);
+      httpExchange.close();
+      return;
+    }
+
+    log(httpExchange);
+
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     httpExchange.sendResponseHeaders(200, 0);
     try (OutputStream responseBody = httpExchange.getResponseBody()) {
