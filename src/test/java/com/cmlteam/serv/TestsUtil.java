@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Scanner;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +19,7 @@ final class TestsUtil {
 
   static Path createTestFile(Path folder, String name, String content) throws IOException {
     Path file = folder.resolve(name);
-    Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+    Files.write(file, content.getBytes(UTF_8));
     return file;
   }
 
@@ -49,5 +50,13 @@ final class TestsUtil {
     FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
 
     fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+  }
+
+  static String getUrlToString(String url) throws IOException {
+    try (Scanner scanner =
+        new Scanner(new URL(url).openStream(), UTF_8.toString())) {
+      scanner.useDelimiter("\\A");
+      return scanner.hasNext() ? scanner.next() : "";
+    }
   }
 }

@@ -1,19 +1,25 @@
 package com.cmlteam.serv;
 
+import com.cmlteam.util.Util;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.nio.file.Path;
 
-import static com.cmlteam.serv.TestsUtil.createTestFile;
-import static com.cmlteam.serv.TestsUtil.createTestFolder;
+import static com.cmlteam.serv.TestsUtil.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ListingTests {
+class ListingTests {
   private static final String testPort = "18888";
 
-  public void basicFolderListingTest(@TempDir Path tempDir) throws IOException {
+  @Test
+  void basicFolderListingTest(@TempDir Path tempDir) throws IOException {
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
     String fname1 = "file1.txt";
@@ -29,7 +35,25 @@ public class ListingTests {
 
     InetSocketAddress address = serv.getAddress();
 
-    URL listingUrl =
-        new URL("http://" + address.getHostName() + ":" + address.getPort() + "/listing");
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/listing";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    Document document = Jsoup.connect(listingUrl).get();
+
+    System.out.println(document);
+
+    Elements trElements = document.select("table tbody tr");
+
+    assertEquals(3, trElements.size());
+    assertEquals(fname1, trElements.get(0).select("td").first().text());
+    assertEquals(fname2, trElements.get(1).select("td").first().text());
+    assertEquals(fname3, trElements.get(2).select("td").first().text());
+    assertEquals(
+        Util.renderFileSize(file1.toFile().length()), trElements.get(0).select("td").get(1).text());
+    assertEquals(
+        Util.renderFileSize(file2.toFile().length()), trElements.get(1).select("td").get(1).text());
+    assertEquals(
+        Util.renderFileSize(file3.toFile().length()), trElements.get(2).select("td").get(1).text());
   }
 }
