@@ -21,6 +21,7 @@ class SharingTests {
 
   @Test
   void testServeSingleFileUncompressed(@TempDir Path tempDir) throws IOException {
+    // GIVEN
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
@@ -28,10 +29,11 @@ class SharingTests {
 
     InetSocketAddress address = serv.getAddress();
 
+    // WHEN
     File resultFile = tempDir.resolve("file_result.txt").toFile();
-
     getUrlToFile("http://" + address.getHostName() + ":" + address.getPort() + "/dl", resultFile);
 
+    // THEN
     assertFilesEqual(inputFile, resultFile);
 
     serv.stop();
@@ -39,6 +41,7 @@ class SharingTests {
 
   @Test
   void testServeSingleFileCompressed(@TempDir Path tempDir) throws IOException {
+    // GIVEN
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
@@ -46,11 +49,13 @@ class SharingTests {
 
     InetSocketAddress address = serv.getAddress();
 
+    // WHEN
     File resultFileGz = tempDir.resolve("file_result.txt.gz").toFile();
 
     getUrlToFile(
         "http://" + address.getHostName() + ":" + address.getPort() + "/dl?z", resultFileGz);
 
+    // THEN
     GzipCompressorInputStream gzipCompressorInputStream =
         new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(resultFileGz)));
 
@@ -74,6 +79,7 @@ class SharingTests {
   }
 
   void testServeFolder(boolean isGz, Path tempDir) throws IOException {
+    // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
     String fname1 = "file1.txt";
@@ -89,11 +95,14 @@ class SharingTests {
 
     InetSocketAddress address = serv.getAddress();
 
+    // WHEN
     File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
+
     getUrlToFile(
         "http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""),
         resultFile);
 
+    // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
 
     FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
@@ -119,6 +128,7 @@ class SharingTests {
   }
 
   void testServeFileSet(boolean isGz, Path tempDir) throws IOException {
+    // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
     String fname1 = "file1.txt";
@@ -144,11 +154,13 @@ class SharingTests {
 
     InetSocketAddress address = serv.getAddress();
 
+    // WHEN
     File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
     getUrlToFile(
         "http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""),
         resultFile);
 
+    // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
 
     FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
