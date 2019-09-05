@@ -57,6 +57,7 @@ class ListingTests {
     Elements trElements = document.select("table tbody tr");
 
     assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals(0, document.select("a.up").size());
     assertEquals(3, trElements.size());
     assertEquals(fname1, trElements.get(0).select("td").first().text());
     assertEquals(fname2, trElements.get(1).select("td").first().text());
@@ -104,6 +105,7 @@ class ListingTests {
     Elements trElements = document.select("table tbody tr");
 
     assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals(0, document.select("a.up").size());
     assertEquals(2, trElements.size());
     assertEquals(fname1, trElements.get(0).select("td").first().text());
     assertEquals(fname3, trElements.get(1).select("td").first().text());
@@ -143,6 +145,7 @@ class ListingTests {
     Elements trElements = document.select("table tbody tr");
 
     assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals(0, document.select("a.up").size());
     assertEquals(3, trElements.size());
     assertEquals(given01.folderName1, trElements.get(0).select("td").first().text());
     assertEquals(given01.folderName2, trElements.get(1).select("td").first().text());
@@ -198,6 +201,7 @@ class ListingTests {
     Elements trElements = document.select("table tbody tr");
 
     assertEquals("Index of /" + given.folderName2 + "/", document.select("h1").first().text());
+    assertEquals(1, document.select("a.up").size());
     assertEquals(2, trElements.size());
     assertEquals(given.fname4, trElements.get(0).select("td").first().text());
     assertEquals(given.fname5, trElements.get(1).select("td").first().text());

@@ -148,7 +148,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "</h1>",
           isRoot
               ? "" /* no up link */
-              : "<a href='/listing"
+              : "<a class=\"up\" href='/listing"
                   + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
                   + "'>↑ UP</a><br><br>",
           "<table>",
