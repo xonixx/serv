@@ -128,6 +128,10 @@ class ListingTests {
     Document document = Jsoup.connect(listingUrl).get();
 
     // THEN
+    checkCorrectListingRoot(given, document);
+  }
+
+  private void checkCorrectListingRoot(GivenForComplexFileSet given, Document document) {
     System.out.println(document);
 
     Elements trElements = document.select("table tbody tr");
@@ -166,10 +170,9 @@ class ListingTests {
             .first()
             .attr("href");
 
-    String listingUrlNext = given.baseUrl + nextPage;
-
     // WHEN
     // emulate click on a folder 'input_folder2' link
+    String listingUrlNext = given.baseUrl + nextPage;
     Document document = Jsoup.connect(listingUrlNext).get();
 
     // THEN
@@ -188,6 +191,41 @@ class ListingTests {
     assertEquals(
         Util.renderFileSize(given.file5.toFile().length()),
         trElements.get(1).select("td").get(1).text());
+  }
+
+  @Test
+  void complexFileSetListingNavigationUpTest(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
+
+    String listingUrl = given.baseUrl + "/listing";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    Document documentRoot = Jsoup.connect(listingUrl).get();
+
+    String nextPage =
+        documentRoot
+            .select("table tbody tr")
+            .get(1)
+            .select("td")
+            .first()
+            .select("a")
+            .first()
+            .attr("href");
+
+    String listingUrlNext = given.baseUrl + nextPage;
+
+    // emulate click on a folder 'input_folder2' link
+    Document document = Jsoup.connect(listingUrlNext).get();
+
+    // WHEN
+    // emulate clicking UP link
+    String listingUrlUp = given.baseUrl + document.select("a.up").attr("href");
+    document = Jsoup.connect(listingUrlUp).get();
+
+    // THEN
+    checkCorrectListingRoot(given, document);
   }
 
   @RequiredArgsConstructor
