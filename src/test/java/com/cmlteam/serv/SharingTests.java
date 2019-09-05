@@ -1,6 +1,7 @@
 package com.cmlteam.serv;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -18,6 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SharingTests {
   private static final String testPort = "18888";
+  private Serv serv;
+
+  @AfterEach
+  void afterEach() {
+    serv.stop();
+  }
 
   @Test
   void testServeSingleFileUncompressed(@TempDir Path tempDir) throws IOException {
@@ -25,7 +32,7 @@ class SharingTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    Serv serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+    serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -35,8 +42,6 @@ class SharingTests {
 
     // THEN
     assertFilesEqual(inputFile, resultFile);
-
-    serv.stop();
   }
 
   @Test
@@ -45,7 +50,7 @@ class SharingTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    Serv serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+    serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -64,8 +69,6 @@ class SharingTests {
     Files.copy(gzipCompressorInputStream, resultFile.toPath());
 
     assertFilesEqual(inputFile, resultFile);
-
-    serv.stop();
   }
 
   @Test
@@ -91,7 +94,7 @@ class SharingTests {
     Path file3 =
         createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
 
-    Serv serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 
@@ -113,8 +116,6 @@ class SharingTests {
     String[] list = resultExtractedFolder.toFile().list();
     assertNotNull(list);
     assertEquals(3, list.length, "number of files should be same");
-
-    serv.stop();
   }
 
   @Test
@@ -142,7 +143,7 @@ class SharingTests {
         createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
     Path file4 = createTestFile(inputFolder, fname4, "<h1>Hello</h1>");
 
-    Serv serv =
+    serv =
         new Serv(
             new String[] {
               "-p",
@@ -171,7 +172,5 @@ class SharingTests {
     String[] list = resultExtractedFolder.toFile().list();
     assertNotNull(list);
     assertEquals(3, list.length, "number of files should be same");
-
-    serv.stop();
   }
 }
