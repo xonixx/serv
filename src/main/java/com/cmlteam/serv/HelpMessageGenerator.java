@@ -31,7 +31,7 @@ class HelpMessageGenerator {
         + "NB! All files will be placed into current folder!\n\n"
         + getOutputStringByUrlAndExtractPart(url, extractPart)
         + getOutputStringByUrlAndExtractPart(urlZ, extractPartZ)
-        + "Files listing:\n"
+        + "\nFiles listing: "
         + listUrl;
   }
 
