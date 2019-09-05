@@ -118,21 +118,9 @@ class ListingTests {
   @Test
   void complexFileSetListingTest(@TempDir Path tempDir) throws IOException {
     // GIVEN
-    GivenForComplexFileSet given01 = GivenForComplexFileSet.prepare(tempDir);
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    serv =
-        new Serv(
-            new String[] {
-              "-p",
-              testPort,
-              given01.inputFolder1.toFile().getAbsolutePath(),
-              given01.inputFolder2.toFile().getAbsolutePath(),
-              given01.file7.toFile().getAbsolutePath()
-            });
-
-    InetSocketAddress address = serv.getAddress();
-
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/listing";
+    String listingUrl = given.baseUrl + "/listing";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -147,34 +135,22 @@ class ListingTests {
     assertEquals("Index of /", document.select("h1").first().text());
     assertEquals(0, document.select("a.up").size());
     assertEquals(3, trElements.size());
-    assertEquals(given01.folderName1, trElements.get(0).select("td").first().text());
-    assertEquals(given01.folderName2, trElements.get(1).select("td").first().text());
-    assertEquals(given01.fname7, trElements.get(2).select("td").first().text());
+    assertEquals(given.folderName1, trElements.get(0).select("td").first().text());
+    assertEquals(given.folderName2, trElements.get(1).select("td").first().text());
+    assertEquals(given.fname7, trElements.get(2).select("td").first().text());
     assertEquals("", trElements.get(0).select("td").get(1).text());
     assertEquals("", trElements.get(1).select("td").get(1).text());
     assertEquals(
-        Util.renderFileSize(given01.file7.toFile().length()),
+        Util.renderFileSize(given.file7.toFile().length()),
         trElements.get(2).select("td").get(1).text());
   }
 
   @Test
   void complexFileSetListingNavigationTest(@TempDir Path tempDir) throws IOException {
     // GIVEN
-    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(tempDir);
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    serv =
-        new Serv(
-            new String[] {
-              "-p",
-              testPort,
-              given.inputFolder1.toFile().getAbsolutePath(),
-              given.inputFolder2.toFile().getAbsolutePath(),
-              given.file7.toFile().getAbsolutePath()
-            });
-
-    InetSocketAddress address = serv.getAddress();
-
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/listing";
+    String listingUrl = given.baseUrl + "/listing";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -189,7 +165,8 @@ class ListingTests {
             .select("a")
             .first()
             .attr("href");
-    String listingUrlNext = "http://" + address.getHostName() + ":" + address.getPort() + nextPage;
+
+    String listingUrlNext = given.baseUrl + nextPage;
 
     // WHEN
     // emulate click on a folder 'input_folder2' link
@@ -231,8 +208,10 @@ class ListingTests {
     private final Path file5;
     private final String fname7;
     private final Path file7;
+    private final String baseUrl;
 
-    private static GivenForComplexFileSet prepare(Path tempDir) throws IOException {
+    private static GivenForComplexFileSet prepare(ListingTests listingTests, Path tempDir)
+        throws IOException {
       String folderName1 = "input_folder1";
       Path inputFolder1 = createTestFolder(tempDir, folderName1);
 
@@ -257,6 +236,20 @@ class ListingTests {
       String fname7 = "FiLe777";
       Path file7 = createTestFile(tempDir, fname7, "");
 
+      Serv serv =
+          new Serv(
+              new String[] {
+                "-p",
+                testPort,
+                inputFolder1.toFile().getAbsolutePath(),
+                inputFolder2.toFile().getAbsolutePath(),
+                file7.toFile().getAbsolutePath()
+              });
+      listingTests.serv = serv;
+      InetSocketAddress address = serv.getAddress();
+
+      String baseUrl = "http://" + address.getHostName() + ":" + address.getPort();
+
       return new GivenForComplexFileSet(
           folderName1,
           inputFolder1,
@@ -273,7 +266,8 @@ class ListingTests {
           file4,
           file5,
           fname7,
-          file7);
+          file7,
+          baseUrl);
     }
   }
 }
