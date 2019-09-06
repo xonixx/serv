@@ -1,6 +1,7 @@
 package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,16 +10,22 @@ import java.nio.charset.StandardCharsets;
 public class HttpHandlerWebInfoPage extends HttpHandlerBase {
   private String outputString;
 
+  private final HttpHandler httpHandler404 = new HttpHandler404();
+  private final HttpHandler httpHandlerFavicon = new HttpHandlerFavicon();
+
   HttpHandlerWebInfoPage(String outputString) {
     this.outputString = outputString;
   }
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
-    if (!"/".equals(httpExchange.getRequestURI().toString())) {
-      // TODO Handle correctly GET /favicon.ico #20
-      httpExchange.sendResponseHeaders(404, 0);
-      httpExchange.close();
+    String requestUri = httpExchange.getRequestURI().toString();
+    if (!"/".equals(requestUri)) {
+      if ("/favicon.ico".equals(requestUri)) {
+        httpHandlerFavicon.handle(httpExchange);
+      } else {
+        httpHandler404.handle(httpExchange);
+      }
       return;
     }
 
