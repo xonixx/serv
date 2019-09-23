@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 public class HttpHandlerWebInfoPage extends HttpHandlerBase {
   private String outputString;
 
-  private final HttpHandler httpHandler404 = new HttpHandler404();
   private final HttpHandler httpHandlerFavicon = new HttpHandlerFavicon();
 
   HttpHandlerWebInfoPage(String outputString) {
@@ -24,7 +23,7 @@ public class HttpHandlerWebInfoPage extends HttpHandlerBase {
       if ("/favicon.ico".equals(requestUri)) {
         httpHandlerFavicon.handle(httpExchange);
       } else {
-        httpHandler404.handle(httpExchange);
+        HttpHandlerForStatus.NOT_FOUND.handle(httpExchange);
       }
       return;
     }

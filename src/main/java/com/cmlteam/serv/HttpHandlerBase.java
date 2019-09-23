@@ -58,6 +58,7 @@ abstract class HttpHandlerBase implements HttpHandler {
       doHandle(exchange);
     } catch (Exception ex) {
       ex.printStackTrace();
+      HttpHandlerForStatus.SERVER_ERROR.doHandle(exchange);
     } finally {
       exchange.close();
     }
