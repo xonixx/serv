@@ -18,7 +18,7 @@ public class HttpHandlerWebInfoPage extends HttpHandlerBase {
   }
 
   @Override
-  public void handle(HttpExchange httpExchange) throws IOException {
+  public void doHandle(HttpExchange httpExchange) throws IOException {
     String requestUri = httpExchange.getRequestURI().toString();
     if (!"/".equals(requestUri)) {
       if ("/favicon.ico".equals(requestUri)) {

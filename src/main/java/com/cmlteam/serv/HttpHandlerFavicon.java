@@ -6,17 +6,12 @@ import java.io.IOException;
 
 class HttpHandlerFavicon extends HttpHandlerBase {
   @Override
-  public void handle(HttpExchange httpExchange) throws IOException {
-    try {
-      httpExchange.getResponseHeaders().add("Content-Type", "image/x-icon");
-      httpExchange.sendResponseHeaders(200, 0);
-      httpExchange.getResponseBody().write(faviconBytes);
-      httpExchange.getResponseBody().flush();
-      httpExchange.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      throw ex;
-    }
+  public void doHandle(HttpExchange httpExchange) throws IOException {
+    httpExchange.getResponseHeaders().add("Content-Type", "image/x-icon");
+    httpExchange.sendResponseHeaders(200, 0);
+    httpExchange.getResponseBody().write(faviconBytes);
+    httpExchange.getResponseBody().flush();
+    httpExchange.close();
   }
 
   // favicon start

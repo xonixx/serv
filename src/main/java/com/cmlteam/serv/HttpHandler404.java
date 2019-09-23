@@ -6,7 +6,7 @@ import java.io.IOException;
 
 class HttpHandler404 extends HttpHandlerBase {
   @Override
-  public void handle(HttpExchange httpExchange) throws IOException {
+  public void doHandle(HttpExchange httpExchange) throws IOException {
     httpExchange.sendResponseHeaders(404, 0);
     httpExchange.close();
   }

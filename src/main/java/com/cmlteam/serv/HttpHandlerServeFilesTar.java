@@ -16,7 +16,7 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
   }
 
   @Override
-  public void handle(HttpExchange httpExchange) throws IOException {
+  public void doHandle(HttpExchange httpExchange) throws IOException {
     log(httpExchange);
     boolean isCompress = isCompressed(httpExchange);
     httpExchange
