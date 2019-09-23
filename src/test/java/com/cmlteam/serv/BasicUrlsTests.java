@@ -46,13 +46,10 @@ class BasicUrlsTests {
     String baseUrl = startSampleApp(tempDir);
 
     // WHEN
-    URL url = new URL(baseUrl + "/nonExistentUrl123");
-    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setRequestMethod("GET");
-    connection.connect();
+    TestsUtil.GetReply reply = TestsUtil.getUrl(baseUrl + "/nonExistentUrl123");
 
     // THEN
-    assertEquals(404, connection.getResponseCode());
+    assertEquals(404, reply.statusCode);
   }
 
   @Test
@@ -64,7 +61,7 @@ class BasicUrlsTests {
     String infoText = TestsUtil.getUrlToString(baseUrl + "/");
 
     // THEN
-//    System.out.println(infoText);
+    //    System.out.println(infoText);
     assertTrue(infoText.contains("To download the"));
   }
 

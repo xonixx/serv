@@ -248,6 +248,20 @@ class ListingTests {
     private final Path file7;
     private final String baseUrl;
 
+    /**
+     * Create file structure:
+     *
+     * <pre>
+     *     /input_folder1/
+     *     /input_folder1/file1.txt
+     *     /input_folder1/file2.txt
+     *     /input_folder1/file3
+     *     /input_folder2/
+     *     /input_folder2/file4.txt
+     *     /input_folder2/file5.csv
+     *     /FiLe777
+     * </pre>
+     */
     private static GivenForComplexFileSet prepare(ListingTests listingTests, Path tempDir)
         throws IOException {
       String folderName1 = "input_folder1";

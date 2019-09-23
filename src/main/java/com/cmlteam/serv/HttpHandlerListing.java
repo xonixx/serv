@@ -34,22 +34,21 @@ public class HttpHandlerListing extends HttpHandlerBase {
   public void doHandle(HttpExchange httpExchange) throws IOException {
     log(httpExchange);
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
-    httpExchange.sendResponseHeaders(200, 0);
     try (OutputStream os = httpExchange.getResponseBody()) {
       FileRef ref = getRequestedFolderToList(httpExchange.getRequestURI());
       if (ref == null) { // no ref = top level
-        showList(-1, null, files, os);
+        showList(httpExchange, -1, null, files, os);
       } else {
         File nextFolder = ref.resolve();
         if (isValidToAccess(nextFolder)) {
           File[] filesInFolder = nextFolder.listFiles();
           if (filesInFolder != null) {
-            showList(ref.fIdx, nextFolder, filesInFolder, os);
+            showList(httpExchange, ref.fIdx, nextFolder, filesInFolder, os);
           } else {
-            os.write(UNABLE_TO_LIST_FILES);
+            showNotFoundErr(httpExchange, os, UNABLE_TO_LIST_FILES);
           }
         } else {
-          os.write(INVALID_FOLDER);
+          showNotFoundErr(httpExchange, os, INVALID_FOLDER);
         }
       }
       os.flush();
@@ -60,8 +59,18 @@ public class HttpHandlerListing extends HttpHandlerBase {
     }
   }
 
-  private void showList(int fIdx, File indexedFolder, File[] files, OutputStream os)
+  private void showNotFoundErr(HttpExchange httpExchange, OutputStream os, byte[] err)
       throws IOException {
+    httpExchange.sendResponseHeaders(404, 0);
+    os.write(err);
+  }
+
+  private void showList(
+      HttpExchange httpExchange, int fIdx, File indexedFolder, File[] files, OutputStream os)
+      throws IOException {
+
+    httpExchange.sendResponseHeaders(200, 0);
+
     writeHeaderWithBackLink(os, fIdx, indexedFolder);
     List<File> filesList = Arrays.asList(files);
 
@@ -81,7 +90,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
         System.err.println(file.getName() + " is not supported");
       }
     }
-    os.write(FOOTER);
+    showNotFoundErr(httpExchange, os, FOOTER);
   }
 
   private void writeFileRow(OutputStream os, File file) throws IOException {

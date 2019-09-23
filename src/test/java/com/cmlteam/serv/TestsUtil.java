@@ -1,8 +1,12 @@
 package com.cmlteam.serv;
 
+import lombok.RequiredArgsConstructor;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -53,10 +57,40 @@ final class TestsUtil {
   }
 
   static String getUrlToString(String url) throws IOException {
-    try (Scanner scanner =
-        new Scanner(new URL(url).openStream(), UTF_8.toString())) {
+    return inputStreamToString(new URL(url).openStream());
+  }
+
+  private static String inputStreamToString(InputStream inputStream) {
+    try (Scanner scanner = new Scanner(inputStream, UTF_8.toString())) {
       scanner.useDelimiter("\\A");
       return scanner.hasNext() ? scanner.next() : "";
+    }
+  }
+
+  @RequiredArgsConstructor
+  static class GetReply {
+    final int statusCode;
+    final String body;
+  }
+
+  static GetReply getUrl(String url) throws IOException {
+    URL url_ = new URL(url);
+    HttpURLConnection connection = null;
+    try {
+      connection = (HttpURLConnection) url_.openConnection();
+      connection.setRequestMethod("GET");
+      connection.connect();
+      int responseCode = connection.getResponseCode();
+      return new GetReply(
+          responseCode,
+          inputStreamToString(
+              responseCode < HttpURLConnection.HTTP_BAD_REQUEST
+                  ? connection.getInputStream()
+                  : connection.getErrorStream()));
+    } finally {
+      if (connection != null) {
+        connection.disconnect();
+      }
     }
   }
 }
