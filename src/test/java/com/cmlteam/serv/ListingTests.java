@@ -4,6 +4,7 @@ import com.cmlteam.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -182,15 +183,13 @@ class ListingTests {
 
     assertEquals("Index of /" + given.folderName2 + "/", document.select("h1").first().text());
     assertEquals(1, document.select("a.up").size());
-    assertEquals(2, trElements.size());
-    assertEquals(given.fname4, trElements.get(0).select("td").first().text());
-    assertEquals(given.fname5, trElements.get(1).select("td").first().text());
-    assertEquals(
-        Util.renderFileSize(given.file4.toFile().length()),
-        trElements.get(0).select("td").get(1).text());
-    assertEquals(
-        Util.renderFileSize(given.file5.toFile().length()),
-        trElements.get(1).select("td").get(1).text());
+    assertEquals(3, trElements.size());
+    Element f0 = trElements.get(1);
+    Element f1 = trElements.get(2);
+    assertEquals(given.fname4, f0.select("td").first().text());
+    assertEquals(given.fname5, f1.select("td").first().text());
+    assertEquals(Util.renderFileSize(given.file4.toFile().length()), f0.select("td").get(1).text());
+    assertEquals(Util.renderFileSize(given.file5.toFile().length()), f1.select("td").get(1).text());
   }
 
   @Test
@@ -228,6 +227,54 @@ class ListingTests {
     checkCorrectListingRoot(given, document);
   }
 
+  @Test
+  void complexFileSetListingNavigationOk_1(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
+
+    String listingUrl = given.baseUrl + "/listing";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    // WHEN
+    TestsUtil.GetReply reply = TestsUtil.getUrl(listingUrl + "?f=1&name=");
+
+    // THEN
+    assertEquals(200, reply.statusCode);
+  }
+
+  @Test
+  void complexFileSetListingNavigationOk_2(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
+
+    String listingUrl = given.baseUrl + "/listing";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    // WHEN
+    TestsUtil.GetReply reply = TestsUtil.getUrl(listingUrl + "?f=1&name=" + given.folderName3);
+
+    // THEN
+    assertEquals(200, reply.statusCode);
+  }
+
+  @Test
+  void complexFileSetListingNavigation404_1(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
+
+    String listingUrl = given.baseUrl + "/listing";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    // WHEN
+    TestsUtil.GetReply reply = TestsUtil.getUrl(listingUrl + "?f=1&name=nonExistentFolder");
+
+    // THEN
+    assertEquals(404, reply.statusCode);
+  }
+
   @RequiredArgsConstructor
   private static class GivenForComplexFileSet {
     private final String folderName1;
@@ -244,6 +291,7 @@ class ListingTests {
     private final String fname5;
     private final Path file4;
     private final Path file5;
+    private final String folderName3;
     private final String fname7;
     private final Path file7;
     private final String baseUrl;
@@ -253,12 +301,14 @@ class ListingTests {
      *
      * <pre>
      *     /input_folder1/
-     *     /input_folder1/file1.txt
-     *     /input_folder1/file2.txt
-     *     /input_folder1/file3
+     *        file1.txt
+     *        file2.txt
+     *        file3
      *     /input_folder2/
-     *     /input_folder2/file4.txt
-     *     /input_folder2/file5.csv
+     *        file4.txt
+     *        file5.csv
+     *        /input_folder3/
+     *            file6.html
      *     /FiLe777
      * </pre>
      */
@@ -284,6 +334,10 @@ class ListingTests {
 
       Path file4 = createTestFile(inputFolder2, fname4, "hello world 123");
       Path file5 = createTestFile(inputFolder2, fname5, "");
+
+      String folderName3 = "input_folder3";
+      Path inputFolder3 = createTestFolder(inputFolder2, folderName3);
+      createTestFolder(inputFolder3, "file6.html");
 
       String fname7 = "FiLe777";
       Path file7 = createTestFile(tempDir, fname7, "");
@@ -317,6 +371,7 @@ class ListingTests {
           fname5,
           file4,
           file5,
+          folderName3,
           fname7,
           file7,
           baseUrl);

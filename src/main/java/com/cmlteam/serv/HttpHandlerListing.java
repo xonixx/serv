@@ -90,7 +90,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
         System.err.println(file.getName() + " is not supported");
       }
     }
-    showNotFoundErr(httpExchange, os, FOOTER);
+    os.write(FOOTER);
   }
 
   private void writeFileRow(OutputStream os, File file) throws IOException {
