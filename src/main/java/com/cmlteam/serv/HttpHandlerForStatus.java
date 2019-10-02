@@ -16,6 +16,5 @@ class HttpHandlerForStatus extends HttpHandlerBase {
   @Override
   public void doHandle(HttpExchange httpExchange) throws IOException {
     httpExchange.sendResponseHeaders(code, 0);
-    httpExchange.close();
   }
 }

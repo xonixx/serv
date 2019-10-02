@@ -11,7 +11,6 @@ class HttpHandlerFavicon extends HttpHandlerBase {
     httpExchange.sendResponseHeaders(200, 0);
     httpExchange.getResponseBody().write(faviconBytes);
     httpExchange.getResponseBody().flush();
-    httpExchange.close();
   }
 
   // favicon start

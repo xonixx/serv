@@ -44,8 +44,6 @@ public class HttpHandlerWebInfoPage extends HttpHandlerBase {
         responseBody.write(string.getBytes(StandardCharsets.UTF_8));
       }
       responseBody.flush();
-    } finally {
-      httpExchange.close();
     }
   }
 }

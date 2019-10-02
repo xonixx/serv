@@ -52,10 +52,6 @@ public class HttpHandlerListing extends HttpHandlerBase {
         }
       }
       os.flush();
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      httpExchange.close();
     }
   }
 
