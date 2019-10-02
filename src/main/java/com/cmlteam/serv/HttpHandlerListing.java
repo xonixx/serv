@@ -27,7 +27,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
   private final File[] files;
 
   HttpHandlerListing(File[] files) {
-    this.files = files;
+    List<File> fileList = Arrays.asList(files);
+    fileList.sort(HttpHandlerListing::compareFiles);
+    this.files = fileList.toArray(new File[0]);
   }
 
   @Override
@@ -61,6 +63,13 @@ public class HttpHandlerListing extends HttpHandlerBase {
     os.write(err);
   }
 
+  // TODO human sort
+  private static int compareFiles(File f1, File f2) {
+    return f1.isFile() && f2.isDirectory()
+        ? 1
+        : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
+  }
+
   private void showList(
       HttpExchange httpExchange, int fIdx, File indexedFolder, File[] files, OutputStream os)
       throws IOException {
@@ -70,12 +79,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     writeHeaderWithBackLink(os, fIdx, indexedFolder);
     List<File> filesList = Arrays.asList(files);
 
-    // TODO human sort
-    filesList.sort(
-        (f1, f2) ->
-            f1.isFile() && f2.isDirectory()
-                ? 1
-                : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName()));
+    filesList.sort(HttpHandlerListing::compareFiles);
 
     for (File file : filesList) {
       if (file.isDirectory()) {
