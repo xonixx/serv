@@ -2,13 +2,18 @@ package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -50,6 +55,61 @@ abstract class HttpHandlerBase implements HttpHandler {
       }
     }
     return query_pairs;
+  }
+
+  // TODO human sort
+  static int compareFiles(File f1, File f2) {
+    return f1.isFile() && f2.isDirectory()
+        ? 1
+        : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
+  }
+
+  File[] sortedFilesArray(File[] files) {
+    List<File> fileList = Arrays.asList(files);
+    fileList.sort(HttpHandlerListing::compareFiles);
+    files = fileList.toArray(new File[0]);
+    return files;
+  }
+
+  @SneakyThrows
+  static FileRef getRequestedFileRef(URI uri) {
+    Map<String, String> paramsMap = splitQuery(uri);
+    String name = paramsMap.get("name");
+    return name == null ? null : new FileRef(Integer.parseInt(paramsMap.get("f")), name);
+  }
+
+  @RequiredArgsConstructor
+  static class FileRef {
+    final int fIdx;
+    final String name;
+
+    /**
+     * @return resolved file or null (if file path is invalid or outside the scope of shared
+     *     folders)
+     */
+    File resolve(File[] files) {
+      File file = new File(files[fIdx], name);
+      return isValidToAccess(files, file) ? file : null;
+    }
+
+    private boolean isValidToAccess(File[] files, File file) {
+      Path pathToCheck = file.toPath();
+      if (!Files.exists(pathToCheck)) {
+        return false;
+      }
+      for (File sharedFile : files) {
+        Path sharedDir = sharedFile.toPath();
+        Path pathToCheckCurrent = pathToCheck;
+        while (pathToCheckCurrent != null) {
+          if (sharedDir.equals(pathToCheckCurrent)) {
+            return true;
+          } else {
+            pathToCheckCurrent = pathToCheckCurrent.getParent();
+          }
+        }
+      }
+      return false;
+    }
   }
 
   @Override
