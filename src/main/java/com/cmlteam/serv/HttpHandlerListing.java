@@ -2,19 +2,14 @@ package com.cmlteam.serv;
 
 import com.cmlteam.util.Util;
 import com.sun.net.httpserver.HttpExchange;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -27,9 +22,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
   private final File[] files;
 
   HttpHandlerListing(File[] files) {
-    List<File> fileList = Arrays.asList(files);
-    fileList.sort(HttpHandlerListing::compareFiles);
-    this.files = fileList.toArray(new File[0]);
+    this.files = sortedFilesArray(files);
   }
 
   @Override
@@ -37,12 +30,12 @@ public class HttpHandlerListing extends HttpHandlerBase {
     log(httpExchange);
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     try (OutputStream os = httpExchange.getResponseBody()) {
-      FileRef ref = getRequestedFolderToList(httpExchange.getRequestURI());
+      FileRef ref = getRequestedFileRef(httpExchange.getRequestURI());
       if (ref == null) { // no ref = top level
         showList(httpExchange, -1, null, files, os);
       } else {
-        File nextFolder = ref.resolve();
-        if (isValidToAccess(nextFolder)) {
+        File nextFolder = ref.resolve(files);
+        if (nextFolder != null) {
           File[] filesInFolder = nextFolder.listFiles();
           if (filesInFolder != null) {
             showList(httpExchange, ref.fIdx, nextFolder, filesInFolder, os);
@@ -61,13 +54,6 @@ public class HttpHandlerListing extends HttpHandlerBase {
       throws IOException {
     httpExchange.sendResponseHeaders(404, 0);
     os.write(err);
-  }
-
-  // TODO human sort
-  private static int compareFiles(File f1, File f2) {
-    return f1.isFile() && f2.isDirectory()
-        ? 1
-        : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
   }
 
   private void showList(
@@ -176,41 +162,5 @@ public class HttpHandlerListing extends HttpHandlerBase {
     for (String s : content) {
       os.write(s.getBytes(UTF_8));
     }
-  }
-
-  @SneakyThrows
-  private FileRef getRequestedFolderToList(URI uri) {
-    Map<String, String> paramsMap = splitQuery(uri);
-    String name = paramsMap.get("name");
-    return name == null ? null : new FileRef(Integer.parseInt(paramsMap.get("f")), name);
-  }
-
-  @RequiredArgsConstructor
-  private class FileRef {
-    private final int fIdx;
-    private final String name;
-
-    File resolve() {
-      return new File(files[fIdx], name);
-    }
-  }
-
-  private boolean isValidToAccess(File file) {
-    Path pathToCheck = file.toPath();
-    if (!Files.exists(pathToCheck)) {
-      return false;
-    }
-    for (File sharedFile : files) {
-      Path sharedDir = sharedFile.toPath();
-      Path pathToCheckCurrent = pathToCheck;
-      while (pathToCheckCurrent != null) {
-        if (sharedDir.equals(pathToCheckCurrent)) {
-          return true;
-        } else {
-          pathToCheckCurrent = pathToCheckCurrent.getParent();
-        }
-      }
-    }
-    return false;
   }
 }

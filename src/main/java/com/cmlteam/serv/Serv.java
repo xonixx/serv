@@ -154,5 +154,6 @@ public class Serv {
   private void serveFiles(HttpServer server, File[] filesArr, Command command) {
     server.createContext("/dl", new HttpHandlerServeFilesTar(filesArr, command.includeVcsFiles));
     server.createContext("/listing", new HttpHandlerListing(filesArr));
+    server.createContext("/file", new HttpHandlerServeFileByLink(filesArr));
   }
 }
