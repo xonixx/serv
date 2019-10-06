@@ -15,8 +15,6 @@ curl http://192.168.0.179:17777/dl > 'report.pdf'
 wget -O- http://192.168.0.179:17777/dl > 'report.pdf'
 curl http://192.168.0.179:17777/dl?z --compressed > 'report.pdf'
 wget -O- http://192.168.0.179:17777/dl?z | gunzip > 'report.pdf'
-
-Or just open in browser: http://192.168.0.179:17777/
 ```
 
 Sharing a folder (all the files in it):
@@ -30,13 +28,13 @@ wget -O- http://192.168.0.179:17777/dl | tar -xvf -
 curl http://192.168.0.179:17777/dl?z | tar -xzvf -
 wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
-Or just open in browser: http://192.168.0.179:17777/
+Files listing: http://192.168.0.108:17777/
 ```
 
 Help message:
 ```
 $ serv -h
-serv ver. 0.2.0
+serv ver. 1.0.0
 usage: serv [...options] <file or folder> [...<file or folder>]
  -H,--host <arg>    host to serve on (default is determined automatically)
  -h,--help          print help and exit
@@ -55,10 +53,11 @@ To install or update the tool simply run the command below.
 
 ```
 $ sudo bash -e -c "
-wget https://github.com/xonixx/serv/releases/download/v0.2.0/serv-linux-amd64 -O/usr/local/bin/serv
+wget https://github.com/xonixx/serv/releases/download/v1.0.0/serv-linux-amd64 -O/usr/local/bin/serv
 chmod +x /usr/local/bin/serv
 echo \"serv \$(serv -v) installed successfully\" 
 "
 ```
 
-Also since the tool is written in Java it can be run in any environment with Java 8 or above.
+Also since the tool is written in Java (and compiled to executable via [GraalVM](https://github.com/oracle/graal) AOT compiler) 
+it can also be run in any environment with Java 8 or above as traditional Java app.

@@ -3,7 +3,7 @@
 set -e
 #set -x
 
-GRAAL=~/soft/graalvm-ce-19.2.0
+GRAAL=~/soft/graalvm-ce-19.2.0.1
 
 NODE=$GRAAL/bin/node
 
