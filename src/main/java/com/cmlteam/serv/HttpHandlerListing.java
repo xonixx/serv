@@ -71,7 +71,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
       if (file.isDirectory()) {
         writeFolderRow(os, fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx, file);
       } else if (file.isFile()) {
-        writeFileRow(os, file);
+        writeFileRow(os, fIdx, file);
       } else {
         System.err.println(file.getName() + " is not supported");
       }
@@ -79,10 +79,17 @@ public class HttpHandlerListing extends HttpHandlerBase {
     os.write(FOOTER);
   }
 
-  private void writeFileRow(OutputStream os, File file) throws IOException {
+  private void writeFileRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
     String size = Util.renderFileSize(file.length());
-    writeStrings(os, new String[] {"<tr><td>", name, "</td><td>", size, "</td></tr>"});
+    String escapedName = fileNameForLink(fIdx, file);
+    String download =
+        String.format(
+            "<a href=\"/file?f=%d&name=%s\">↓ dl</a> | <a href=\"/file?f=%d&name=%s&gz\">↓ gz</a>",
+            fIdx, escapedName, fIdx, escapedName);
+    writeStrings(
+        os,
+        new String[] {"<tr><td>", name, "</td><td>", size, "</td><td>", download, "</td></tr>"});
   }
 
   private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
@@ -97,6 +104,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "'>",
           name,
           "</a></td>",
+          "<td></td>",
           "<td></td>",
           "</tr>"
         });
@@ -152,6 +160,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "<tr>",
           "<th>Name</th>",
           "<th>Size</th>",
+          "<th>Download</th>",
           "</tr>",
           "</thead>",
           "<tbody>"
