@@ -78,7 +78,18 @@ public class HttpHandlerListing extends HttpHandlerBase {
         System.err.println(file.getName() + " is not supported");
       }
     }
+    writeFooter(os);
+  }
+
+  private void writeFooter(OutputStream os) throws IOException {
     os.write(FOOTER);
+    writeStrings(
+        os,
+        new String[] {
+          "<br><a target='_blank' href='",
+          Constants.GITHUB + "'>",
+          Constants.UTILITY_NAME + " " + Constants.VERSION + "</a>"
+        });
   }
 
   private void writeFileRow(OutputStream os, int fIdx, File file) throws IOException {
