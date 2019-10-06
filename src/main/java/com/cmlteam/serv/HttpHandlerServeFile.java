@@ -13,8 +13,9 @@ class HttpHandlerServeFile extends HttpHandlerBase {
   private File file;
 
   HttpHandlerServeFile(File file) {
-    if (file.isDirectory())
+    if (file.isDirectory()) {
       throw new IllegalArgumentException("Should be file, folder given: " + file);
+    }
     this.file = file;
   }
 
