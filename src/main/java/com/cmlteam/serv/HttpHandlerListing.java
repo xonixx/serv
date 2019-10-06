@@ -68,10 +68,12 @@ public class HttpHandlerListing extends HttpHandlerBase {
     filesList.sort(HttpHandlerListing::compareFiles);
 
     for (File file : filesList) {
+      int fIdxFixed = fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx;
+
       if (file.isDirectory()) {
-        writeFolderRow(os, fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx, file);
+        writeFolderRow(os, fIdxFixed, file);
       } else if (file.isFile()) {
-        writeFileRow(os, fIdx, file);
+        writeFileRow(os, fIdxFixed, file);
       } else {
         System.err.println(file.getName() + " is not supported");
       }
@@ -85,7 +87,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/file?f=%d&name=%s\">↓ dl</a> | <a href=\"/file?f=%d&name=%s&z\">↓ gz</a>",
+            "<a href=\"/file?f=%d&name=%s\">↓ download</a> | <a href=\"/file?f=%d&name=%s&z\">↓ compressed</a>",
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
