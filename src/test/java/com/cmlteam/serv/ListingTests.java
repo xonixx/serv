@@ -45,7 +45,7 @@ class ListingTests {
 
     InetSocketAddress address = serv.getAddress();
 
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/listing";
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -93,7 +93,7 @@ class ListingTests {
 
     InetSocketAddress address = serv.getAddress();
 
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/listing";
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -121,7 +121,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -159,7 +159,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -201,7 +201,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -236,7 +236,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -252,7 +252,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -268,7 +268,7 @@ class ListingTests {
     // GIVEN
     GivenForComplexFileSet given = GivenForComplexFileSet.prepare(this, tempDir);
 
-    String listingUrl = given.baseUrl + "/listing";
+    String listingUrl = given.baseUrl + "/";
 
     //    System.out.println(getUrlToString(listingUrl));
 

@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Path;
 
 import static com.cmlteam.serv.TestsUtil.createTestFile;
+import static com.cmlteam.serv.TestsUtil.createTestFolder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,16 +54,30 @@ class BasicUrlsTests {
   }
 
   @Test
-  void testInfoPage(@TempDir Path tempDir) throws IOException {
+  void testListingPageNotServedForFile(@TempDir Path tempDir) throws IOException {
     // GIVEN
     String baseUrl = startSampleApp(tempDir);
 
     // WHEN
-    String infoText = TestsUtil.getUrlToString(baseUrl + "/");
+    TestsUtil.GetReply reply = TestsUtil.getUrl(baseUrl + "/");
 
     // THEN
     //    System.out.println(infoText);
-    assertTrue(infoText.contains("To download the"));
+    assertEquals(404, reply.statusCode);
+  }
+
+  @Test
+  void testListingPageServedForFolder(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    String baseUrl = startSampleAppFolder(tempDir);
+
+    // WHEN
+    TestsUtil.GetReply reply = TestsUtil.getUrl(baseUrl + "/");
+
+    // THEN
+    //    System.out.println(infoText);
+    assertEquals(200, reply.statusCode);
+    assertTrue(reply.body.contains("Index of"));
   }
 
   private String startSampleApp(@TempDir Path tempDir) throws IOException {
@@ -70,6 +85,18 @@ class BasicUrlsTests {
 
     File inputFile = file.toFile();
     serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+
+    InetSocketAddress address = serv.getAddress();
+
+    return "http://" + address.getHostName() + ":" + address.getPort();
+  }
+
+  private String startSampleAppFolder(@TempDir Path tempDir) throws IOException {
+    Path folder = createTestFolder(tempDir, "folder1");
+    Path file1 = createTestFile(folder, "file.txt", "hello world 123");
+    Path file2 = createTestFile(folder, "file.html", "<h1>hello");
+
+    serv = new Serv(new String[] {"-p", testPort, folder.toFile().getAbsolutePath()});
 
     InetSocketAddress address = serv.getAddress();
 

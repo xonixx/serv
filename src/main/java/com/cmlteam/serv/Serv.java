@@ -34,7 +34,7 @@ public class Serv {
       outputString = helpMessageGenerator.getOutputStringForMultipleFilesDownload(urlRoot);
     }
 
-    System.out.println(outputString + "\nOr just open in browser: " + urlRoot);
+    System.out.println(outputString);
     server = createServerWithContext(command, outputString, files);
     server.setExecutor(null); // creates a default executor
     server.start();
@@ -137,7 +137,7 @@ public class Serv {
       Command command, String outputString, Set<File> files) {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
-    server.createContext("/", new HttpHandlerWebInfoPage(outputString));
+    server.createContext("/favicon.ico", new HttpHandlerFavicon());
     if (files.size() == 1) {
       File file = files.iterator().next();
       if (file.isDirectory()) {
@@ -154,7 +154,7 @@ public class Serv {
   private void serveFiles(HttpServer server, String folderName, File[] filesArr, Command command) {
     server.createContext(
         "/dl", new HttpHandlerServeFilesTar(folderName, filesArr, command.includeVcsFiles));
-    server.createContext("/listing", new HttpHandlerListing(filesArr));
+    server.createContext("/", new HttpHandlerListing(filesArr));
     server.createContext("/dlByLink", new HttpHandlerServeFileByLink(filesArr));
   }
 }

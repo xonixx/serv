@@ -118,7 +118,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
         os,
         new String[] {
           "<tr>",
-          "<td><a href='/listing?f=" + fIdx + "&name=",
+          "<td><a href='/?f=" + fIdx + "&name=",
           escapedName,
           "'>",
           name,
@@ -192,7 +192,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "</span></h1>",
           isRoot
               ? "" /* no up link */
-              : "<a class=\"up\" href='/listing"
+              : "<a class=\"up\" href='/"
                   + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
                   + "'>↑ UP</a><br><br>",
           "<table>",
