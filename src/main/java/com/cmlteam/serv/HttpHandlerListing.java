@@ -91,7 +91,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
-        new String[] {"<tr><td>", name, "</td><td>", size, "</td><td>", download, "</td></tr>"});
+        new String[] {
+          "<tr><td>", name, "</td><td>", size, "</td><td class=center>", download, "</td></tr>"
+        });
   }
 
   private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
@@ -111,7 +113,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           name,
           "</a></td>",
           "<td></td>",
-          "<td>",
+          "<td class=center>",
           download,
           "</td>",
           "</tr>"
@@ -154,7 +156,8 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "}",
           "table, table td, table th {",
           "  border: 1px solid #bbb;",
-          "}</style>",
+          "}",
+          ".center { text-align:center }</style>",
           "<h1>Index of ",
           indexedFolderDisplayed,
           "</h1>",
