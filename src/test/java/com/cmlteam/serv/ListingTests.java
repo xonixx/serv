@@ -57,7 +57,7 @@ class ListingTests {
 
     Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals("Index of /", getH1Text(document));
     assertEquals(0, document.select("a.up").size());
     assertEquals(3, trElements.size());
     assertEquals(fname1, trElements.get(0).select("td").first().text());
@@ -105,7 +105,7 @@ class ListingTests {
 
     Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals("Index of /", getH1Text(document));
     assertEquals(0, document.select("a.up").size());
     assertEquals(2, trElements.size());
     assertEquals(fname1, trElements.get(0).select("td").first().text());
@@ -137,7 +137,7 @@ class ListingTests {
 
     Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /", document.select("h1").first().text());
+    assertEquals("Index of /", getH1Text(document));
     assertEquals(0, document.select("a.up").size());
     assertEquals(3, trElements.size());
     assertEquals(given.folderName1, trElements.get(0).select("td").first().text());
@@ -148,6 +148,10 @@ class ListingTests {
     assertEquals(
         Util.renderFileSize(given.file7.toFile().length()),
         trElements.get(2).select("td").get(1).text());
+  }
+
+  private String getH1Text(Document document) {
+    return document.select("h1").first().text().replace(" ↓ tar | ↓ tar.gz", "");
   }
 
   @Test
@@ -181,7 +185,7 @@ class ListingTests {
 
     Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /" + given.folderName2 + "/", document.select("h1").first().text());
+    assertEquals("Index of /" + given.folderName2 + "/", getH1Text(document));
     assertEquals(1, document.select("a.up").size());
     assertEquals(3, trElements.size());
     Element f0 = trElements.get(1);
