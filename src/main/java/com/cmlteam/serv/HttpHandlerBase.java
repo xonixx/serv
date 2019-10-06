@@ -8,15 +8,10 @@ import lombok.SneakyThrows;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 abstract class HttpHandlerBase implements HttpHandler {
   static void log(HttpExchange httpExchange) {
@@ -30,31 +25,11 @@ abstract class HttpHandlerBase implements HttpHandler {
   }
 
   static boolean isCompressed(HttpExchange httpExchange) {
-    return splitQuery(httpExchange.getRequestURI()).containsKey("z");
+    return new QueryParser(httpExchange.getRequestURI()).hasParam("z");
   }
 
   static String escapeFileName(File file) {
     return file.getName().replace('"', '\'');
-  }
-
-  @SneakyThrows
-  static Map<String, String> splitQuery(URI uri) {
-    Map<String, String> query_pairs = new LinkedHashMap<>();
-    String query = uri.getQuery();
-    if (query != null) {
-      String[] pairs = query.split("&");
-      if (pairs.length == 1) {
-        query_pairs.put(pairs[0], null);
-      } else {
-        for (String pair : pairs) {
-          int idx = pair.indexOf("=");
-          query_pairs.put(
-              URLDecoder.decode(pair.substring(0, idx), UTF_8.name()),
-              URLDecoder.decode(pair.substring(idx + 1), UTF_8.name()));
-        }
-      }
-    }
-    return query_pairs;
   }
 
   // TODO human sort
@@ -73,9 +48,9 @@ abstract class HttpHandlerBase implements HttpHandler {
 
   @SneakyThrows
   static FileRef getRequestedFileRef(URI uri) {
-    Map<String, String> paramsMap = splitQuery(uri);
-    String name = paramsMap.get("name");
-    return name == null ? null : new FileRef(Integer.parseInt(paramsMap.get("f")), name);
+    QueryParser queryParser = new QueryParser(uri);
+    String name = queryParser.getParam("name");
+    return name == null ? null : new FileRef(Integer.parseInt(queryParser.getParam("f")), name);
   }
 
   @RequiredArgsConstructor

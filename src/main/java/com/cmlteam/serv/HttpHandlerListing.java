@@ -85,7 +85,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/file?f=%d&name=%s\">↓ dl</a> | <a href=\"/file?f=%d&name=%s&gz\">↓ gz</a>",
+            "<a href=\"/file?f=%d&name=%s\">↓ dl</a> | <a href=\"/file?f=%d&name=%s&z\">↓ gz</a>",
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
