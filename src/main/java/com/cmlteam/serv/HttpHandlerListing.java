@@ -87,7 +87,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/file?f=%d&name=%s\">↓ download</a> | <a href=\"/file?f=%d&name=%s&z\">↓ compressed</a>",
+            "<a href=\"/dlByLink?f=%d&name=%s\">↓ download</a> | <a href=\"/dlByLink?f=%d&name=%s&z\">↓ compressed</a>",
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
@@ -97,6 +97,10 @@ public class HttpHandlerListing extends HttpHandlerBase {
   private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
     String escapedName = fileNameForLink(fIdx, file);
+    String download =
+        String.format(
+            "<a href=\"/dlByLink?f=%d&name=%s\">↓ tar</a> | <a href=\"/dlByLink?f=%d&name=%s&z\">↓ tar.gz</a>",
+            fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
         new String[] {
@@ -107,7 +111,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
           name,
           "</a></td>",
           "<td></td>",
-          "<td></td>",
+          "<td>",
+          download,
+          "</td>",
           "</tr>"
         });
   }

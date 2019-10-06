@@ -14,14 +14,17 @@ import java.util.Arrays;
 import java.util.List;
 
 abstract class HttpHandlerBase implements HttpHandler {
-  static void log(HttpExchange httpExchange) {
+  void log(HttpExchange httpExchange) {
     System.out.println(
         "["
             + httpExchange.getRemoteAddress().getAddress().getHostAddress()
             + "] "
             + httpExchange.getRequestMethod()
             + " "
-            + httpExchange.getRequestURI());
+            + httpExchange.getRequestURI()
+            + " ("
+            + getClass().getSimpleName()
+            + ")");
   }
 
   static boolean isCompressed(HttpExchange httpExchange) {
