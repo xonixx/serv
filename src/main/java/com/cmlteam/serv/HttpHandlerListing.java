@@ -98,7 +98,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/dlByLink?f=%d&name=%s\">↓ download</a> | <a href=\"/dlByLink?f=%d&name=%s&z\">↓ compressed</a>",
+            "<a href=\"/dlRef?f=%d&name=%s\">↓ download</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ compressed</a>",
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
@@ -112,7 +112,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/dlByLink?f=%d&name=%s\">↓ tar</a> | <a href=\"/dlByLink?f=%d&name=%s&z\">↓ tar.gz</a>",
+            "<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>",
             fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
@@ -166,9 +166,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
     if (!isRoot) {
       String escapedName = fileNameForLink(fIdx, indexedFolder);
       download =
-          String.format("<a href=\"/dlByLink?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
+          String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
       downloadZ =
-          String.format("<a href=\"/dlByLink?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
+          String.format("<a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
     } else {
       download = "<a href=\"/dl\">↓ tar</a> | ";
       downloadZ = "<a href=\"/dl?z\">↓ tar.gz</a>";

@@ -35,7 +35,7 @@ public class Serv {
     }
 
     System.out.println(outputString);
-    server = createServerWithContext(command, outputString, files);
+    server = createServerWithContext(command, files);
     server.setExecutor(null); // creates a default executor
     server.start();
   }
@@ -133,8 +133,7 @@ public class Serv {
   }
 
   @SneakyThrows
-  private HttpServer createServerWithContext(
-      Command command, String outputString, Set<File> files) {
+  private HttpServer createServerWithContext(Command command, Set<File> files) {
     String serveIp = command.serveHost != null ? command.serveHost : IpUtil.getLocalNetworkIp();
     HttpServer server = HttpServer.create(new InetSocketAddress(serveIp, command.servePort), 0);
     server.createContext("/favicon.ico", new HttpHandlerFavicon());
@@ -155,6 +154,6 @@ public class Serv {
     server.createContext(
         "/dl", new HttpHandlerServeFilesTar(folderName, filesArr, command.includeVcsFiles));
     server.createContext("/", new HttpHandlerListing(filesArr));
-    server.createContext("/dlByLink", new HttpHandlerServeFileByLink(filesArr));
+    server.createContext("/dlRef", new HttpHandlerServeFileByLink(filesArr));
   }
 }

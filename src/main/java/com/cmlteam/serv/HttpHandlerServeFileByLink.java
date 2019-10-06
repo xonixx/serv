@@ -14,8 +14,6 @@ class HttpHandlerServeFileByLink extends HttpHandlerBase {
 
   @Override
   public void doHandle(HttpExchange httpExchange) throws IOException {
-    log(httpExchange);
-
     FileRef ref = getRequestedFileRef(httpExchange.getRequestURI());
 
     if (ref != null) {
