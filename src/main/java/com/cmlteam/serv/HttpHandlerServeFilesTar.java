@@ -9,8 +9,10 @@ import java.io.OutputStream;
 class HttpHandlerServeFilesTar extends HttpHandlerBase {
   private final File[] files;
   private final boolean includeVcsFiles;
+  private final String folderName;
 
-  HttpHandlerServeFilesTar(File[] files, boolean includeVcsFiles) {
+  HttpHandlerServeFilesTar(String folderName, File[] files, boolean includeVcsFiles) {
+    this.folderName = folderName;
     this.files = files;
     this.includeVcsFiles = includeVcsFiles;
   }
@@ -23,7 +25,11 @@ class HttpHandlerServeFilesTar extends HttpHandlerBase {
         .getResponseHeaders()
         .add(
             "Content-Disposition",
-            "attachment; filename=\"files.tar" + (isCompress ? ".gz" : "") + "\"");
+            "attachment; filename=\""
+                + folderName
+                + ".tar"
+                + (isCompress ? ".gz" : "")
+                + "\""); // TODO should we escape the folder name?
     httpExchange.sendResponseHeaders(200, 0);
 
     try (OutputStream os = httpExchange.getResponseBody()) {

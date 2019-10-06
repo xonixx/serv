@@ -24,7 +24,8 @@ class HttpHandlerServeFileByLink extends HttpHandlerBase {
         if (file.isFile()) {
           new HttpHandlerServeFile(file).doHandle(httpExchange);
         } else if (file.isDirectory()) {
-          new HttpHandlerServeFilesTar(file.listFiles(), true).doHandle(httpExchange);
+          new HttpHandlerServeFilesTar(file.getName(), file.listFiles(), true)
+              .doHandle(httpExchange);
         } else {
           HttpHandlerForStatus.NOT_FOUND.handle(httpExchange);
         }

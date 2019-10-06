@@ -141,18 +141,19 @@ public class Serv {
     if (files.size() == 1) {
       File file = files.iterator().next();
       if (file.isDirectory()) {
-        serveFiles(server, file.listFiles(), command);
+        serveFiles(server, file.getName(), file.listFiles(), command);
       } else {
         server.createContext("/dl", new HttpHandlerServeFile(file));
       }
     } else {
-      serveFiles(server, files.toArray(new File[0]), command);
+      serveFiles(server, "files", files.toArray(new File[0]), command);
     }
     return server;
   }
 
-  private void serveFiles(HttpServer server, File[] filesArr, Command command) {
-    server.createContext("/dl", new HttpHandlerServeFilesTar(filesArr, command.includeVcsFiles));
+  private void serveFiles(HttpServer server, String folderName, File[] filesArr, Command command) {
+    server.createContext(
+        "/dl", new HttpHandlerServeFilesTar(folderName, filesArr, command.includeVcsFiles));
     server.createContext("/listing", new HttpHandlerListing(filesArr));
     server.createContext("/dlByLink", new HttpHandlerServeFileByLink(filesArr));
   }
