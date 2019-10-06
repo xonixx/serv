@@ -17,6 +17,10 @@ class QueryParser {
     this.uri = uri;
   }
 
+  QueryParser(String uri) {
+    this(URI.create(uri));
+  }
+
   String getParam(String param) {
     ensureParsed();
     return parsedQuery.get(param);
@@ -39,15 +43,11 @@ class QueryParser {
     String query = uri.getQuery();
     if (query != null) {
       String[] pairs = query.split("&");
-      if (pairs.length == 1) {
-        queryPairs.put(pairs[0], null);
-      } else {
-        for (String pair : pairs) {
-          int idx = pair.indexOf("=");
-          queryPairs.put(
-              URLDecoder.decode(pair.substring(0, idx), UTF_8.name()),
-              URLDecoder.decode(pair.substring(idx + 1), UTF_8.name()));
-        }
+      for (String pair : pairs) {
+        int idx = pair.indexOf("=");
+        String key = idx < 0 ? pair : pair.substring(0, idx);
+        String val = idx < 0 ? "" : pair.substring(idx + 1);
+        queryPairs.put(URLDecoder.decode(key, UTF_8.name()), URLDecoder.decode(val, UTF_8.name()));
       }
     }
     return queryPairs;
