@@ -148,6 +148,21 @@ public class HttpHandlerListing extends HttpHandlerBase {
       parentUrl = fileNameForLink(fIdx, upFile);
     }
     boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
+
+    String download;
+    String downloadZ;
+
+    if (!isRoot) {
+      String escapedName = fileNameForLink(fIdx, indexedFolder);
+      download =
+          String.format("<a href=\"/dlByLink?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
+      downloadZ =
+          String.format("<a href=\"/dlByLink?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
+    } else {
+      download = "<a href=\"/dl\">↓ tar</a> | ";
+      downloadZ = "<a href=\"/dl?z\">↓ tar.gz</a>";
+    }
+
     writeStrings(
         os,
         new String[] {
@@ -160,7 +175,10 @@ public class HttpHandlerListing extends HttpHandlerBase {
           ".center { text-align:center }</style>",
           "<h1>Index of ",
           indexedFolderDisplayed,
-          "</h1>",
+          "&nbsp;<span style='font-size:.5em;font-weight:normal'>",
+          download,
+          downloadZ,
+          "</span></h1>",
           isRoot
               ? "" /* no up link */
               : "<a class=\"up\" href='/listing"
