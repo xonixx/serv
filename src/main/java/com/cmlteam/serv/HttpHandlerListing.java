@@ -165,8 +165,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
 
     if (!isRoot) {
       String escapedName = fileNameForLink(fIdx, indexedFolder);
-      download =
-          String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
+      download = String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
       downloadZ =
           String.format("<a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
     } else {

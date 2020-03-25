@@ -1,5 +1,6 @@
 package com.cmlteam.serv;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 import java.net.URI;
@@ -9,13 +10,10 @@ import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@RequiredArgsConstructor
 class QueryParser {
   private final URI uri;
   private Map<String, String> parsedQuery;
-
-  QueryParser(URI uri) {
-    this.uri = uri;
-  }
 
   QueryParser(String uri) {
     this(URI.create(uri));

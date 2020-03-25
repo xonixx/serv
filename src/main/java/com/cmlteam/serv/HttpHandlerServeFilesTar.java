@@ -1,21 +1,17 @@
 package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpExchange;
+import lombok.RequiredArgsConstructor;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
+@RequiredArgsConstructor
 class HttpHandlerServeFilesTar extends HttpHandlerBase {
+  private final String folderName;
   private final File[] files;
   private final boolean includeVcsFiles;
-  private final String folderName;
-
-  HttpHandlerServeFilesTar(String folderName, File[] files, boolean includeVcsFiles) {
-    this.folderName = folderName;
-    this.files = files;
-    this.includeVcsFiles = includeVcsFiles;
-  }
 
   @Override
   public void doHandle(HttpExchange httpExchange) throws IOException {
