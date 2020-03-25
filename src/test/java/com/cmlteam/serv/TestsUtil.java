@@ -45,7 +45,7 @@ final class TestsUtil {
     assertEquals(expectedFile.length(), resultFile.length(), "file size must be same");
     assertThat(resultFile)
         .describedAs("files should have same content")
-        .hasSameContentAs(expectedFile);
+        .hasSameBinaryContentAs(expectedFile);
   }
 
   static void getUrlToFile(String url, File resultFile) throws IOException {
