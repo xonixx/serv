@@ -1,6 +1,6 @@
 # serv
 
-![](https://github.com/xonixx/serv/workflows/Run%20Unit%20Tests/badge.svg?branch=master)
+![](https://github.com/xonixx/serv/workflows/Unit%20Tests/badge.svg?branch=master)
 
 The simple tool to quickly share file or folder in local network.
 
