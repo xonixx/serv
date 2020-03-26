@@ -1,5 +1,7 @@
 # serv
 
+![](https://github.com/xonixx/serv/workflows/Run%20Unit%20Tests/badge.svg?branch=master)
+
 The simple tool to quickly share file or folder in local network.
 
 After running the tool it gives you the precise commands that you can pass to your teammate to receive the file(s).
