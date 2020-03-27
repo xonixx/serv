@@ -88,7 +88,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
         new String[] {
           "<br><a target='_blank' href='",
           Constants.GITHUB + "'>",
-          Constants.UTILITY_NAME + " " + Constants.VERSION + "</a>"
+          Constants.UTILITY_NAME + " " + Constants.getVersion() + "</a>"
         });
   }
 
