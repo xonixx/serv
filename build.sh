@@ -23,7 +23,6 @@ cat src/main/java/com/cmlteam/serv/Constants.java | \
     sed "s/%JAVA_VERSION%/$java_version/" > $tmp_src_dir/com/cmlteam/serv/Constants.java
 
 $GRAAL/bin/javac \
-    -version \
     -encoding UTF-8 \
     -d target/classes \
     $tmp_src_dir/com/cmlteam/serv/Constants.java

@@ -89,14 +89,14 @@ public class Serv {
     }
 
     if (cmd.hasOption(help.getLongOpt())) {
-      System.out.println(Constants.UTILITY_NAME + " ver. " + Constants.getVERSION());
+      System.out.println(Constants.UTILITY_NAME + " ver. " + Constants.getFullVersion());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(UTILITY_HELP_LINE, options);
       System.exit(0);
     }
 
     if (cmd.hasOption(version.getLongOpt())) {
-      System.out.println(Constants.getVERSION());
+      System.out.println(Constants.getFullVersion());
       System.exit(0);
     }
 
