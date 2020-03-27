@@ -6,7 +6,28 @@ set -e
 GRAAL=~/soft/graalvm-ce-19.2.0.1
 UPX=~/soft/upx-3.95-amd64_linux
 
+graal_version=$($GRAAL/bin/java -version 2>&1 | grep GraalVM | sed -E 's#.+(GraalVM.+) \(.+#\1#')
+java_version=$($GRAAL/bin/java -version 2>&1 | head -n 1 | sed 's/ version//' | sed 's/"//g')
+
+echo "Java version: $java_version"
+echo "Graal version: $graal_version"
+
 mvn clean compile
+
+tmp_src_dir=/tmp/serv-tmp
+
+rm -rf $tmp_src_dir
+mkdir -p $tmp_src_dir/com/cmlteam/serv
+cat src/main/java/com/cmlteam/serv/Constants.java | \
+    sed "s/%GRAAL_VERSION%/$graal_version/" | \
+    sed "s/%JAVA_VERSION%/$java_version/" > $tmp_src_dir/com/cmlteam/serv/Constants.java
+
+$GRAAL/bin/javac \
+    -version \
+    -encoding UTF-8 \
+    -d target/classes \
+    $tmp_src_dir/com/cmlteam/serv/Constants.java
+
 CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
 
 if [[ ! -d ./build ]]
