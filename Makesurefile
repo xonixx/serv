@@ -43,13 +43,9 @@
 
 @goal built_native
 @depends_on build_folder_created graal_native_installed javac
-  cd ./build/
-
-  echo 111
-
   CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
 
-  echo "CP=" $CP
+  cd ./build/
 
   echo
   echo Graal
@@ -59,6 +55,8 @@
   ls -lh ./com.cmlteam.serv.serv
 
 @goal upx
+  cd ./build/
+
   echo
   echo Upx
   echo
