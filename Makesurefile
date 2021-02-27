@@ -1,0 +1,75 @@
+
+@options timing
+
+@define GRAAL=~/.sdkman/candidates/java/21.0.0.2.r11-grl
+@define UPX=~/soft/upx-3.95-amd64_linux
+
+@goal build_folder_created
+@reached_if [[ -d ./build ]]
+  mkdir ./build
+
+@goal graal_native_installed
+@reached_if [[ -f $GRAAL/bin/native-image ]]
+  echo "Installing native-image..."
+  cd "$GRAAL/bin/"
+  ./gu install native-image
+
+@goal javac
+  export JAVA_HOME="$GRAAL"
+  graal_version=$($GRAAL/bin/java -version 2>&1 | grep '64' | grep GraalVM | sed -E 's#.+(GraalVM.+) \(.+#\1#')
+  java_version=$($GRAAL/bin/java -version 2>&1 | head -n 1 | sed 's/ version//' | sed 's/"//g')
+
+  echo "Java version: $java_version"
+  echo "Graal version: $graal_version"
+
+  mvn clean compile
+
+  app_version=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args='${project.version}')
+
+  tmp_src_dir=/tmp/serv-tmp
+
+  rm -rf $tmp_src_dir
+  mkdir -p $tmp_src_dir/com/cmlteam/serv
+
+  cat src/main/java/com/cmlteam/serv/Constants.java | \
+      sed "s/%GRAAL_VERSION%/$graal_version/" | \
+      sed "s/%JAVA_VERSION%/$java_version/" | \
+      sed "s/%APP_VERSION%/$app_version/" > $tmp_src_dir/com/cmlteam/serv/Constants.java
+
+  $GRAAL/bin/javac \
+      -encoding UTF-8 \
+      -d target/classes \
+      $tmp_src_dir/com/cmlteam/serv/Constants.java
+
+@goal built_native
+@depends_on build_folder_created graal_native_installed javac
+  cd ./build/
+
+  echo 111
+
+  CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
+
+  echo "CP=" $CP
+
+  echo
+  echo Graal
+  echo
+
+  $GRAAL/bin/native-image -cp "$CP" com.cmlteam.serv.Serv
+  ls -lh ./com.cmlteam.serv.serv
+
+@goal upx
+  echo
+  echo Upx
+  echo
+
+  rm -f ./serv
+  $UPX/upx ./com.cmlteam.serv.serv -oserv
+  ls -lh ./serv
+
+@goal built
+@depends_on built_native upx
+
+@goal default
+@depends_on built
+
