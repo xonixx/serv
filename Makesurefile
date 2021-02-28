@@ -47,19 +47,11 @@
 
   cd ./build/
 
-  echo
-  echo Graal
-  echo
-
   $GRAAL/bin/native-image -cp "$CP" com.cmlteam.serv.Serv
   ls -lh ./com.cmlteam.serv.serv
 
 @goal upx
   cd ./build/
-
-  echo
-  echo Upx
-  echo
 
   rm -f ./serv
   $UPX/upx ./com.cmlteam.serv.serv -oserv
