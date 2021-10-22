@@ -2,7 +2,7 @@
 @options timing
 
 @define GRAAL=~/.sdkman/candidates/java/21.0.0.2.r11-grl
-@define UPX=~/soft/upx-3.95-amd64_linux
+@define UPX_HOME=~/soft/upx-3.95-amd64_linux
 
 @goal build_folder_created
 @reached_if [[ -d ./build ]]
@@ -54,7 +54,7 @@
   cd ./build/
 
   rm -f ./serv
-  $UPX/upx ./com.cmlteam.serv.serv -oserv
+  $UPX_HOME/upx ./com.cmlteam.serv.serv -oserv
   ls -lh ./serv
 
 @goal built
