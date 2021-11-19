@@ -2,6 +2,7 @@
 @options timing
 
 @define GRAAL=~/.sdkman/candidates/java/21.3.0.r17-grl
+#@define GRAAL=~/.sdkman/candidates/java/21.3.0.r11-grl
 @define UPX_HOME=~/soft/upx-3.95-amd64_linux
 
 @goal build_folder_created
@@ -47,7 +48,9 @@
 
   cd ./build/
 
-  $GRAAL/bin/native-image -cp "$CP" com.cmlteam.serv.Serv
+  $GRAAL/bin/native-image -cp "$CP" com.cmlteam.serv.Serv \
+    -H:IncludeResources='.*ico$' \
+    -H:Log=registerResource:
   ls -lh ./com.cmlteam.serv.serv
 
 @goal upx
