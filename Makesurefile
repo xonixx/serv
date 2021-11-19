@@ -1,7 +1,7 @@
 
 @options timing
 
-@define GRAAL=~/.sdkman/candidates/java/21.0.0.2.r11-grl
+@define GRAAL=~/.sdkman/candidates/java/21.3.0.r17-grl
 @define UPX_HOME=~/soft/upx-3.95-amd64_linux
 
 @goal build_folder_created
