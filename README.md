@@ -63,3 +63,7 @@ echo \"serv \$(serv -v) installed successfully\"
 
 Also since the tool is written in Java (and compiled to executable via [GraalVM](https://github.com/oracle/graal) AOT compiler) 
 it can also be run in any environment with Java 8 or above as traditional Java app.
+
+## Dev notes
+
+Captured a tag with last commit where favicon was done via embedding bytes in Java code: [favicon-via-bytes-in-java](https://github.com/xonixx/serv/tree/favicon-via-bytes-in-java). This was necessary since this was the most reliable way to serve resources in Graal at time.
