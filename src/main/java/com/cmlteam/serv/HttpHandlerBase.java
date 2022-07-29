@@ -58,7 +58,14 @@ abstract class HttpHandlerBase implements HttpHandler {
 
   @RequiredArgsConstructor
   static class FileRef {
+    /**
+     * The index of a file/folder in CLI args list, ex. `serv file1 dir2 dir3`.
+     * In case of `serv dir` the files in dir are listed.
+     */
     final int fIdx;
+    /**
+     * The file path relative to dir set by `fIdx`
+     */
     final String name;
 
     /**
