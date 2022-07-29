@@ -140,7 +140,7 @@ public class Serv {
     if (files.size() == 1) {
       File file = files.iterator().next();
       if (file.isDirectory()) {
-        serveFiles(server, file.getName(), file.listFiles(), command);
+        serveFiles(server, file.getName(), files.toArray(new File[0])/*file.listFiles()*/, command);
       } else {
         server.createContext("/dl", new HttpHandlerServeFile(file));
       }

@@ -32,7 +32,11 @@ public class HttpHandlerListing extends HttpHandlerBase {
     try (OutputStream os = httpExchange.getResponseBody()) {
       FileRef ref = getRequestedFileRef(httpExchange.getRequestURI());
       if (ref == null) { // no ref = top level
-        showList(httpExchange, -1, null, files, os);
+        if (files.length == 1 && files[0].isDirectory()) {
+          showList(httpExchange, 0, null, files[0].listFiles(), os);
+        } else {
+          showList(httpExchange, -1, null, files, os);
+        }
       } else {
         File nextFolder = ref.resolve(files);
         if (nextFolder != null) {
@@ -134,7 +138,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
   @SneakyThrows
   private String fileNameForLink(int fIdx, File file) {
     String relativePath = relativePath(fIdx, file);
-    return URLEncoder.encode(relativePath, UTF_8.name());
+    return URLEncoder.encode(relativePath, UTF_8);
   }
 
   @SneakyThrows
