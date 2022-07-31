@@ -65,30 +65,32 @@ abstract class HttpHandlerBase implements HttpHandler {
      */
     final String name;
 
+    final File[] files;
+
     @SneakyThrows
     @NonNull
-    static FileRef fromUri(URI uri) {
+    static FileRef of(URI uri, File[] files) {
       QueryParser queryParser = new QueryParser(uri);
       String name = queryParser.getParam("name");
       String f = queryParser.getParam("f");
-      return new FileRef(f == null ? ROOT_IDX : Integer.parseInt(f), name);
+      return new FileRef(f == null ? ROOT_IDX : Integer.parseInt(f), name, files);
     }
 
-    boolean isRoot(File[] files) {
+    boolean isRoot() {
       return ROOT_IDX == fIdx ||
-              files.length == 1 && files[0].isDirectory() && files[0].equals(resolve(files));
+              files.length == 1 && files[0].isDirectory() && files[0].equals(resolve());
     }
 
     /**
      * @return resolved file or null (if file path is invalid or outside the scope of shared
      *     folders)
      */
-    File resolve(File[] files) {
+    File resolve() {
       File file = new File(files[fIdx], name);
-      return isValidToAccess(files, file) ? file : null;
+      return isValidToAccess(file) ? file : null;
     }
 
-    private boolean isValidToAccess(File[] files, File file) {
+    private boolean isValidToAccess(File file) {
       Path pathToCheck = file.toPath();
       if (!Files.exists(pathToCheck)) {
         return false;
