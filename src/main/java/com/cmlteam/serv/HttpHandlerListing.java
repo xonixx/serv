@@ -30,7 +30,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     log(httpExchange);
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     try (OutputStream os = httpExchange.getResponseBody()) {
-      FileRef ref = getRequestedFileRef(httpExchange.getRequestURI());
+      FileRef ref = FileRef.fromUri(httpExchange.getRequestURI());
       if (ref == null) { // no ref = top level
         if (files.length == 1 && files[0].isDirectory()) {
           showList(httpExchange, 0, null, files[0].listFiles(), os);
@@ -38,11 +38,11 @@ public class HttpHandlerListing extends HttpHandlerBase {
           showList(httpExchange, -1, null, files, os);
         }
       } else {
-        File nextFolder = ref.resolve(files);
-        if (nextFolder != null) {
-          File[] filesInFolder = nextFolder.listFiles();
+        File refFolder = ref.resolve(files);
+        if (refFolder != null) {
+          File[] filesInFolder = refFolder.listFiles();
           if (filesInFolder != null) {
-            showList(httpExchange, ref.fIdx, nextFolder, filesInFolder, os);
+            showList(httpExchange, ref.fIdx, refFolder, filesInFolder, os);
           } else {
             showNotFoundErr(httpExchange, os, UNABLE_TO_LIST_FILES);
           }

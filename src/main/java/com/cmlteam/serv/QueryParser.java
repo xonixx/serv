@@ -45,7 +45,7 @@ class QueryParser {
         int idx = pair.indexOf("=");
         String key = idx < 0 ? pair : pair.substring(0, idx);
         String val = idx < 0 ? "" : pair.substring(idx + 1);
-        queryPairs.put(URLDecoder.decode(key, UTF_8.name()), URLDecoder.decode(val, UTF_8.name()));
+        queryPairs.put(URLDecoder.decode(key, UTF_8), URLDecoder.decode(val, UTF_8));
       }
     }
     return queryPairs;

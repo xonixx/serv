@@ -9,6 +9,8 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,8 +29,9 @@ class ListingTests {
     serv.stop();
   }
 
-  @Test
-  void basicFolderListingTest(@TempDir Path tempDir) throws IOException {
+  @ParameterizedTest
+  @ValueSource(strings = {"", "?f=0&name="})
+  void basicFolderListingTest(String path, @TempDir Path tempDir) throws IOException {
     // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
@@ -45,7 +48,7 @@ class ListingTests {
 
     InetSocketAddress address = serv.getAddress();
 
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/";
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/" + path;
 
     //    System.out.println(getUrlToString(listingUrl));
 

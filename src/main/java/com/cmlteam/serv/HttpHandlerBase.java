@@ -49,13 +49,6 @@ abstract class HttpHandlerBase implements HttpHandler {
     return files;
   }
 
-  @SneakyThrows
-  static FileRef getRequestedFileRef(URI uri) {
-    QueryParser queryParser = new QueryParser(uri);
-    String name = queryParser.getParam("name");
-    return name == null ? null : new FileRef(Integer.parseInt(queryParser.getParam("f")), name);
-  }
-
   @RequiredArgsConstructor
   static class FileRef {
     /**
@@ -67,6 +60,13 @@ abstract class HttpHandlerBase implements HttpHandler {
      * The file path relative to dir set by `fIdx`
      */
     final String name;
+
+    @SneakyThrows
+    static FileRef fromUri(URI uri) {
+      QueryParser queryParser = new QueryParser(uri);
+      String name = queryParser.getParam("name");
+      return name == null ? null : new FileRef(Integer.parseInt(queryParser.getParam("f")), name);
+    }
 
     /**
      * @return resolved file or null (if file path is invalid or outside the scope of shared
