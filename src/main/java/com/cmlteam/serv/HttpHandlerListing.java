@@ -31,7 +31,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     try (OutputStream os = httpExchange.getResponseBody()) {
       FileRef ref = FileRef.fromUri(httpExchange.getRequestURI());
-      if (ref == null) { // no ref = top level
+      if (ref.isRoot(files)) {
         if (files.length == 1 && files[0].isDirectory()) {
           showList(httpExchange, 0, null, files[0].listFiles(), os);
         } else {

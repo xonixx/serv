@@ -74,13 +74,9 @@ abstract class HttpHandlerBase implements HttpHandler {
       return new FileRef(f == null ? ROOT_IDX : Integer.parseInt(f), name);
     }
 
-    boolean hasNoName() {
-      return name == null || "".equals(name);
-    }
-
     boolean isRoot(File[] files) {
       return ROOT_IDX == fIdx ||
-              hasNoName() && files.length == 1 && files[0].isDirectory();
+              files.length == 1 && files[0].isDirectory() && files[0].equals(resolve(files));
     }
 
     /**
