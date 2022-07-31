@@ -75,7 +75,7 @@ class ListingTests {
   }
 
   @Test
-  void basicFolderListingCorrectUpLinkTitle(@TempDir Path tempDir) throws IOException {
+  void basicFolderListingCorrectTitle(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path folder1 = createTestFolder(tempDir, "folder1");
     Path folder2 = createTestFolder(folder1, "folder2");
