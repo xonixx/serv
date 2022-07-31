@@ -72,6 +72,39 @@ class ListingTests {
   }
 
   @Test
+  void basicFolderListingCorrectUpLinkTitle(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    Path folder1 = createTestFolder(tempDir, "folder1");
+    Path folder2 = createTestFolder(folder1, "folder2");
+    Path file = createTestFile(folder2, "f.txt", "abc");
+
+    serv = new Serv(new String[] {"-p", testPort, folder1.toFile().getAbsolutePath()});
+
+    InetSocketAddress address = serv.getAddress();
+
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/";
+
+    //    System.out.println(getUrlToString(listingUrl));
+
+    Document document = Jsoup.connect(listingUrl).get();
+
+//    System.out.println(document);
+
+    Elements trElements = document.select("table tbody tr");
+    String href = trElements.get(0).select("td a").first().attr("href");
+//    System.out.println(href);
+
+    String listingUrl1 = "http://" + address.getHostName() + ":" + address.getPort() + href;
+
+    // WHEN
+    Document document1 = Jsoup.connect(listingUrl1).get();
+
+    // THEN
+    assertEquals("Index of /", getH1Text(document));
+    assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
+  }
+
+  @Test
   void basicFileSetListingTest(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
