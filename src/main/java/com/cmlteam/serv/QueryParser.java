@@ -20,19 +20,17 @@ class QueryParser {
   }
 
   String getParam(String param) {
-    ensureParsed();
-    return parsedQuery.get(param);
+    return ensureParsed().get(param);
   }
 
   boolean hasParam(String param) {
-    ensureParsed();
-    return parsedQuery.containsKey(param);
+    return ensureParsed().containsKey(param);
   }
 
-  private void ensureParsed() {
-    if (parsedQuery == null) {
+  private Map<String, String> ensureParsed() {
+    if (parsedQuery == null)
       parsedQuery = splitQuery(uri);
-    }
+    return parsedQuery;
   }
 
   @SneakyThrows

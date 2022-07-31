@@ -16,7 +16,7 @@ class HttpHandlerServeFileByLink extends HttpHandlerBase {
   public void doHandle(HttpExchange httpExchange) throws IOException {
     FileRef ref = FileRef.fromUri(httpExchange.getRequestURI());
 
-    if (ref != null) {
+    if (ref.hasNoName()) { // TODO
       File file = ref.resolve(files);
       if (file != null) {
         if (file.isFile()) {

@@ -2,8 +2,10 @@ package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.ToString;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +52,9 @@ abstract class HttpHandlerBase implements HttpHandler {
   }
 
   @RequiredArgsConstructor
+  @ToString
   static class FileRef {
+    static final int ROOT_IDX = -1;
     /**
      * The index of a file/folder in CLI args list, ex. `serv file1 dir2 dir3`.
      * In case of `serv dir` the files in dir are listed.
@@ -62,10 +66,21 @@ abstract class HttpHandlerBase implements HttpHandler {
     final String name;
 
     @SneakyThrows
+    @NonNull
     static FileRef fromUri(URI uri) {
       QueryParser queryParser = new QueryParser(uri);
       String name = queryParser.getParam("name");
-      return name == null ? null : new FileRef(Integer.parseInt(queryParser.getParam("f")), name);
+      String f = queryParser.getParam("f");
+      return new FileRef(f == null ? ROOT_IDX : Integer.parseInt(f), name);
+    }
+
+    boolean hasNoName() {
+      return name == null || "".equals(name);
+    }
+
+    boolean isRoot(File[] files) {
+      return ROOT_IDX == fIdx ||
+              hasNoName() && files.length == 1 && files[0].isDirectory();
     }
 
     /**
