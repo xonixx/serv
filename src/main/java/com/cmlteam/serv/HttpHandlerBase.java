@@ -78,7 +78,7 @@ abstract class HttpHandlerBase implements HttpHandler {
 
     boolean isRoot() {
       return ROOT_IDX == fIdx ||
-              files.length == 1 && files[0].isDirectory() && files[0].equals(resolve());
+              ("".equals(name) || name == null) && files.length == 1 && files[0].isDirectory();
     }
 
     /**

@@ -30,19 +30,19 @@ public class HttpHandlerListing extends HttpHandlerBase {
     log(httpExchange);
     httpExchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
     try (OutputStream os = httpExchange.getResponseBody()) {
-      FileRef ref = FileRef.of(httpExchange.getRequestURI(), files);
+      FileRef ref = FileRef.of(httpExchange.getRequestURI(),files);
       if (ref.isRoot()) {
         if (files.length == 1 && files[0].isDirectory()) {
-          showList(httpExchange, ref, null, files[0].listFiles(), os);
+          showList(httpExchange, 0, null, files[0].listFiles(), os);
         } else {
-          showList(httpExchange, ref, null, files, os);
+          showList(httpExchange, -1, null, files, os);
         }
       } else {
         File refFolder = ref.resolve();
         if (refFolder != null) {
           File[] filesInFolder = refFolder.listFiles();
           if (filesInFolder != null) {
-            showList(httpExchange, ref, refFolder, filesInFolder, os);
+            showList(httpExchange, ref.fIdx, refFolder, filesInFolder, os);
           } else {
             showNotFoundErr(httpExchange, os, UNABLE_TO_LIST_FILES);
           }
@@ -61,23 +61,23 @@ public class HttpHandlerListing extends HttpHandlerBase {
   }
 
   private void showList(
-          HttpExchange httpExchange, FileRef ref, File indexedFolder, File[] files, OutputStream os)
+      HttpExchange httpExchange, int fIdx, File indexedFolder, File[] files, OutputStream os)
       throws IOException {
 
     httpExchange.sendResponseHeaders(200, 0);
 
-    writeHeaderWithBackLink(os, ref, indexedFolder);
+    writeHeaderWithBackLink(os, fIdx, indexedFolder);
     List<File> filesList = Arrays.asList(files);
 
     filesList.sort(HttpHandlerListing::compareFiles);
 
     for (File file : filesList) {
-//      FileRef ref1 = ref.isRoot() ? new FileRef(filesList.indexOf(file),"",files) : ref;
+      int fIdxFixed = fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx;
 
       if (file.isDirectory()) {
-        writeFolderRow(os, ref, file);
+        writeFolderRow(os, fIdxFixed, file);
       } else if (file.isFile()) {
-        writeFileRow(os, ref, file);
+        writeFileRow(os, fIdxFixed, file);
       } else {
         System.err.println(file.getName() + " is not supported");
       }
@@ -96,14 +96,14 @@ public class HttpHandlerListing extends HttpHandlerBase {
         });
   }
 
-  private void writeFileRow(OutputStream os, FileRef ref, File file) throws IOException {
+  private void writeFileRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
     String size = Util.renderFileSize(file.length());
-    String escapedName = fileNameForLink(ref, file);
+    String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
             "<a href=\"/dlRef?f=%d&name=%s\">↓ download</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ compressed</a>",
-            ref.fIdx, escapedName, ref.fIdx, escapedName);
+            fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
         new String[] {
@@ -111,18 +111,18 @@ public class HttpHandlerListing extends HttpHandlerBase {
         });
   }
 
-  private void writeFolderRow(OutputStream os, FileRef ref, File file) throws IOException {
+  private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
-    String escapedName = fileNameForLink(ref, file);
+    String escapedName = fileNameForLink(fIdx, file);
     String download =
         String.format(
             "<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>",
-            ref.fIdx, escapedName, ref.fIdx, escapedName);
+            fIdx, escapedName, fIdx, escapedName);
     writeStrings(
         os,
         new String[] {
           "<tr>",
-          "<td><a href='/?f=" + ref.fIdx + "&name=",
+          "<td><a href='/?f=" + fIdx + "&name=",
           escapedName,
           "'>",
           name,
@@ -136,47 +136,47 @@ public class HttpHandlerListing extends HttpHandlerBase {
   }
 
   @SneakyThrows
-  private String fileNameForLink(FileRef ref, File file) {
-    String relativePath = relativePath(ref, file);
+  private String fileNameForLink(int fIdx, File file) {
+    String relativePath = relativePath(fIdx, file);
     return URLEncoder.encode(relativePath, UTF_8);
   }
 
   @SneakyThrows
-  private String relativePath(FileRef ref, File file) {
-    if (ref.isRoot()) {
+  private String relativePath(int fIdx, File file) {
+    if (fIdx == -1) {
       return "/";
     }
 
-    File root = files[ref.fIdx];
+    File root = files[fIdx];
     return root.toURI().relativize(file.toURI()).getPath();
   }
 
-  private void writeHeaderWithBackLink(OutputStream os, FileRef ref, File indexedFolder)
+  private void writeHeaderWithBackLink(OutputStream os, int fIdx, File indexedFolder)
       throws IOException {
     boolean isRoot = indexedFolder == null;
     String indexedFolderDisplayed =
-        "/" + (isRoot ? "" : files[ref.fIdx].getName() + "/" + relativePath(ref, indexedFolder));
+        "/" + (isRoot ? "" : files[fIdx].getName() + "/" + relativePath(fIdx, indexedFolder));
 
     String parentUrl = "";
     if (!isRoot) {
       File upFile = indexedFolder.getParentFile();
-      parentUrl = fileNameForLink(ref, upFile);
+      parentUrl = fileNameForLink(fIdx, upFile);
     }
+    boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
 
     String download;
     String downloadZ;
 
     if (!isRoot) {
-      String escapedName = fileNameForLink(ref, indexedFolder);
-      download = String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", ref.fIdx, escapedName);
+      String escapedName = fileNameForLink(fIdx, indexedFolder);
+      download = String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
       downloadZ =
-          String.format("<a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>", ref.fIdx, escapedName);
+          String.format("<a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
     } else {
       download = "<a href=\"/dl\">↓ tar</a> | ";
       downloadZ = "<a href=\"/dl?z\">↓ tar.gz</a>";
     }
 
-    boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
     writeStrings(
         os,
         new String[] {
@@ -196,7 +196,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           isRoot
               ? "" /* no up link */
               : "<a class=\"up\" href='/"
-                  + (upIsRoot ? "" : "?f=" + ref.fIdx + "&name=" + parentUrl)
+                  + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
                   + "'>↑ UP</a><br><br>",
           "<table>",
           "<thead>",

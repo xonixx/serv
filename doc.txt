@@ -1,0 +1,29 @@
+
+
+
+serv folder
+
+/ -> folder/{f1,f2,f3}
+
+Listing for /
+f=0 f1
+f=0 f2
+f=0 f3
+
+-----------------------
+
+serv folder1 folder2 file3
+
+/ -> folder1 folder2/{f1,f2,f3} file3
+
+-------------------------
+
+Listing for /
+f=0 folder1
+f=1 folder2
+f=2 file3
+
+Listing for folder2/
+f=1 f1
+f=1 f2
+f=1 f3

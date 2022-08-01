@@ -78,8 +78,10 @@ class ListingTests {
   void basicFolderListingCorrectTitle(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path folder1 = createTestFolder(tempDir, "folder1");
+    Path file1 = createTestFile(folder1, "f1.txt", "abc");
+
     Path folder2 = createTestFolder(folder1, "folder2");
-    Path file = createTestFile(folder2, "f.txt", "abc");
+    Path file2 = createTestFile(folder2, "f2.txt", "abc");
 
     serv = new Serv(new String[] {"-p", testPort, folder1.toFile().getAbsolutePath()});
 
@@ -90,8 +92,7 @@ class ListingTests {
     //    System.out.println(getUrlToString(listingUrl));
 
     Document document = Jsoup.connect(listingUrl).get();
-
-//    System.out.println(document);
+    System.out.println(document);
 
     Elements trElements = document.select("table tbody tr");
     String href = trElements.get(0).select("td a").first().attr("href");
@@ -101,6 +102,7 @@ class ListingTests {
 
     // WHEN
     Document document1 = Jsoup.connect(listingUrl1).get();
+    System.out.println(document1);
 
     // THEN
     assertEquals("Index of /", getH1Text(document));
