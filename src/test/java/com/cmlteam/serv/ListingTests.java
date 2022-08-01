@@ -103,10 +103,12 @@ class ListingTests {
     // WHEN
     Document document1 = Jsoup.connect(listingUrl1).get();
     System.out.println(document1);
+    Element upLink1 = document1.select("a.up").first();
 
     // THEN
     assertEquals("Index of /", getH1Text(document));
     assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
+    assertEquals("/?f=0&name=",upLink1.attr("href"));
   }
 
   @Test

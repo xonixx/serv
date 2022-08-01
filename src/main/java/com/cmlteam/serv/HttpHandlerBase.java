@@ -67,7 +67,7 @@ abstract class HttpHandlerBase implements HttpHandler {
     /**
      * The file path relative to dir set by `fIdx`
      */
-    final String name;
+    final String name; // TODO rename to path
 
     final File[] files;
 

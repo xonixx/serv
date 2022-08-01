@@ -99,11 +99,11 @@ public class HttpHandlerListing extends HttpHandlerBase {
   private void writeFileRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
     String size = Util.renderFileSize(file.length());
-    String escapedName = fileNameForLink(fIdx, file);
+    String dlParams = dlParams(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/dlRef?f=%d&name=%s\">↓ download</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ compressed</a>",
-            fIdx, escapedName, fIdx, escapedName);
+            "<a href=\"/dlRef%s\">↓ download</a> | <a href=\"/dlRef%s&z\">↓ compressed</a>",
+            dlParams, dlParams);
     writeStrings(
         os,
         new String[] {
@@ -113,17 +113,17 @@ public class HttpHandlerListing extends HttpHandlerBase {
 
   private void writeFolderRow(OutputStream os, int fIdx, File file) throws IOException {
     String name = file.getName();
-    String escapedName = fileNameForLink(fIdx, file);
+    String dlParams = dlParams(fIdx, file);
     String download =
         String.format(
-            "<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | <a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>",
-            fIdx, escapedName, fIdx, escapedName);
+            "<a href=\"/dlRef%s\">↓ tar</a> | <a href=\"/dlRef%s&z\">↓ tar.gz</a>",
+            dlParams, dlParams);
     writeStrings(
         os,
         new String[] {
           "<tr>",
-          "<td><a href='/?f=" + fIdx + "&name=",
-          escapedName,
+          "<td><a href='/",
+          dlParams,
           "'>",
           name,
           "</a></td>",
@@ -133,12 +133,6 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "</td>",
           "</tr>"
         });
-  }
-
-  @SneakyThrows
-  private String fileNameForLink(int fIdx, File file) {
-    String relativePath = relativePath(fIdx, file);
-    return URLEncoder.encode(relativePath, UTF_8);
   }
 
   @SneakyThrows
@@ -163,13 +157,13 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String downloadZ;
 
     if (!isRoot) {
-      String escapedName = fileNameForLink(fIdx, indexedFolder);
-      download = String.format("<a href=\"/dlRef?f=%d&name=%s\">↓ tar</a> | ", fIdx, escapedName);
+      String dlParams = dlParams(fIdx, indexedFolder);
+      download = String.format("<a href='/dlRef?%s'>↓ tar</a> | ", dlParams);
       downloadZ =
-          String.format("<a href=\"/dlRef?f=%d&name=%s&z\">↓ tar.gz</a>", fIdx, escapedName);
+          String.format("<a href='/dlRef?%s&z'>↓ tar.gz</a>", dlParams);
     } else {
-      download = "<a href=\"/dl\">↓ tar</a> | ";
-      downloadZ = "<a href=\"/dl?z\">↓ tar.gz</a>";
+      download = "<a href='/dl'>↓ tar</a> | ";
+      downloadZ = "<a href='/dl?z'>↓ tar.gz</a>";
     }
 
     writeStrings(
@@ -191,7 +185,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           isRoot
               ? "" /* no up link */
               : "<a class=\"up\" href='/"
-                  + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + fileNameForLink(fIdx, indexedFolder.getParentFile()))
+                  + (upIsRoot ? "" : dlParams(fIdx, indexedFolder.getParentFile()))
                   + "'>↑ UP</a><br><br>",
           "<table>",
           "<thead>",
@@ -203,6 +197,11 @@ public class HttpHandlerListing extends HttpHandlerBase {
           "</thead>",
           "<tbody>"
         });
+  }
+
+  private String dlParams(int fIdx, File file) {
+    String relativePath = relativePath(fIdx, file);
+    return "?f=" + fIdx + "&name=" + URLEncoder.encode(relativePath, UTF_8);
   }
 
   private void writeStrings(OutputStream os, String[] content) throws IOException {
