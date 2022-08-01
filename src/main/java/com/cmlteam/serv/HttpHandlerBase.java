@@ -99,18 +99,7 @@ abstract class HttpHandlerBase implements HttpHandler {
       if (!Files.exists(pathToCheck)) {
         return false;
       }
-      for (File sharedFile : files) {
-        Path sharedDir = sharedFile.toPath();
-        Path pathToCheckCurrent = pathToCheck;
-        while (pathToCheckCurrent != null) {
-          if (sharedDir.equals(pathToCheckCurrent)) {
-            return true;
-          } else {
-            pathToCheckCurrent = pathToCheckCurrent.getParent();
-          }
-        }
-      }
-      return false;
+      return Arrays.stream(files).anyMatch(sharedFile -> !sharedFile.toPath().relativize(pathToCheck).toString().contains(".."));
     }
   }
 
