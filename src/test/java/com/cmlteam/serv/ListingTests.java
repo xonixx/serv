@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.List;
 
 import static com.cmlteam.serv.TestsUtil.createTestFile;
 import static com.cmlteam.serv.TestsUtil.createTestFolder;
@@ -72,6 +73,37 @@ class ListingTests {
         Util.renderFileSize(file2.toFile().length()), trElements.get(1).select("td").get(1).text());
     assertEquals(
         Util.renderFileSize(file3.toFile().length()), trElements.get(2).select("td").get(1).text());
+  }
+
+  @Test
+  void listingFilesOrderingTest(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    Path inputFolder = createTestFolder(tempDir, "input_folder");
+
+    List<String> filesUnordered = List.of("x","b.txt","a.txt","z","y");
+
+    for (String f : filesUnordered) {
+      createTestFile(inputFolder, f, "");
+    }
+
+    Path folder = createTestFolder(inputFolder, "folder");
+
+    for (String f : filesUnordered) {
+      createTestFile(folder, f, "");
+    }
+
+    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+
+    InetSocketAddress address = serv.getAddress();
+
+    // WHEN
+    DocumentAccessor doc1 = new DocumentAccessor(Jsoup.connect("http://" + address.getHostName() + ":" + address.getPort()).get());
+    String link = doc1.getFolderLinks().get("folder");
+    DocumentAccessor doc2 = new DocumentAccessor(Jsoup.connect("http://" + address.getHostName() + ":" + address.getPort() + link).get());
+
+    // THEN
+    assertEquals(List.of("folder", "a.txt", "b.txt", "x", "y", "z"), doc1.getFileNames());
+    assertEquals(List.of("a.txt", "b.txt", "x", "y", "z"), doc2.getFileNames());
   }
 
   @Test
