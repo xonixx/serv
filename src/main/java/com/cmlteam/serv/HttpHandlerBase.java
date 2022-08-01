@@ -77,7 +77,7 @@ abstract class HttpHandlerBase implements HttpHandler {
       QueryParser queryParser = new QueryParser(uri);
       String name = queryParser.getParam("name");
       String f = queryParser.getParam("f");
-      return new FileRef(f == null ? ROOT_IDX : Integer.parseInt(f), name, files);
+      return new FileRef(f == null ? (!"".equals(name) && name != null ? 0 : ROOT_IDX) : Integer.parseInt(f), name, files);
     }
 
     boolean isRoot() {

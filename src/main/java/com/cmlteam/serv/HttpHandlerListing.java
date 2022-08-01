@@ -157,11 +157,6 @@ public class HttpHandlerListing extends HttpHandlerBase {
     String indexedFolderDisplayed =
         "/" + (isRoot ? "" : (isSingleFolder(files) ? "" : files[fIdx].getName() + "/") + relativePath(fIdx, indexedFolder));
 
-    String parentUrl = "";
-    if (!isRoot) {
-      File upFile = indexedFolder.getParentFile();
-      parentUrl = fileNameForLink(fIdx, upFile);
-    }
     boolean upIsRoot = Arrays.asList(files).contains(indexedFolder);
 
     String download;
@@ -196,7 +191,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
           isRoot
               ? "" /* no up link */
               : "<a class=\"up\" href='/"
-                  + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + parentUrl)
+                  + (upIsRoot ? "" : "?f=" + fIdx + "&name=" + fileNameForLink(fIdx, indexedFolder.getParentFile()))
                   + "'>↑ UP</a><br><br>",
           "<table>",
           "<thead>",
