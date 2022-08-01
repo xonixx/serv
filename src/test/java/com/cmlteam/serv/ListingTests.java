@@ -4,7 +4,6 @@ import com.cmlteam.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +15,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static com.cmlteam.serv.TestsUtil.createTestFile;
 import static com.cmlteam.serv.TestsUtil.createTestFolder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ListingTests {
   private static final String testPort = "18888";
@@ -55,24 +55,23 @@ class ListingTests {
 
     // WHEN
     Document document = Jsoup.connect(listingUrl).get();
-
+    DocumentAccessor doc = new DocumentAccessor(document);
     // THEN
-    System.out.println(document);
+//    System.out.println(document);
 
-    Elements trElements = document.select("table tbody tr");
+//    Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /", getH1Text(document));
-    assertEquals(0, document.select("a.up").size());
-    assertEquals(3, trElements.size());
-    assertEquals(fname1, trElements.get(0).select("td").first().text());
-    assertEquals(fname2, trElements.get(1).select("td").first().text());
-    assertEquals(fname3, trElements.get(2).select("td").first().text());
+    assertEquals("Index of /", doc.getH1Text());
+    assertFalse(doc.hasUpLink());
+
+    assertEquals(List.of(fname1,fname2,fname3), doc.getFileNames());
+
     assertEquals(
-        Util.renderFileSize(file1.toFile().length()), trElements.get(0).select("td").get(1).text());
-    assertEquals(
-        Util.renderFileSize(file2.toFile().length()), trElements.get(1).select("td").get(1).text());
-    assertEquals(
-        Util.renderFileSize(file3.toFile().length()), trElements.get(2).select("td").get(1).text());
+        List.of(
+          Util.renderFileSize(file1.toFile().length()),
+          Util.renderFileSize(file2.toFile().length()),
+          Util.renderFileSize(file3.toFile().length())),
+        doc.getFileSizes());
   }
 
   @Test
@@ -144,28 +143,25 @@ class ListingTests {
     //    System.out.println(getUrlToString(listingUrl));
 
     Document document = Jsoup.connect(listingUrl).get();
+    DocumentAccessor doc = new DocumentAccessor(document);
+
 //    System.out.println(document);
 
-    Elements trElements = document.select("table tbody tr");
-    String href = trElements.get(0).select("td a").first().attr("href");
 //    System.out.println(href);
 
-    String listingUrl1 = "http://" + address.getHostName() + ":" + address.getPort() + href;
+    String listingUrl1 = "http://" + address.getHostName() + ":" + address.getPort() + doc.getFolderLinks().get("folder2");
 
     // WHEN
     Document document1 = Jsoup.connect(listingUrl1).get();
+    DocumentAccessor doc1 = new DocumentAccessor(document1);
 //    System.out.println(document1);
-    Element upLink1 = document1.select("a.up").first();
-    Elements topDlLinks = document1.select("h1 a");
-    Element tarLink = topDlLinks.first();
-    Element tarGzLink = topDlLinks.last();
 
     // THEN
-    assertEquals("Index of /", getH1Text(document));
-    assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
-    assertEquals("/",upLink1.attr("href"));
-    assertEquals("/dlRef?name=folder2%2F",tarLink.attr("href"));
-    assertEquals("/dlRef?name=folder2%2F&z",tarGzLink.attr("href"));
+    assertEquals("Index of /", doc.getH1Text());
+    assertEquals("Index of /" + folder2.getFileName() + "/", doc1.getH1Text());
+    assertEquals("/",doc1.getUpLink());
+    assertEquals("/dlRef?name=folder2%2F",doc1.getTarLink());
+    assertEquals("/dlRef?name=folder2%2F&z",doc1.getTarGzLink());
   }
 
   @Test
@@ -196,21 +192,20 @@ class ListingTests {
 
     // WHEN
     Document document = Jsoup.connect(listingUrl).get();
+    DocumentAccessor doc = new DocumentAccessor(document);
 
     // THEN
     System.out.println(document);
 
     Elements trElements = document.select("table tbody tr");
 
-    assertEquals("Index of /", getH1Text(document));
-    assertEquals(0, document.select("a.up").size());
-    assertEquals(2, trElements.size());
-    assertEquals(fname1, trElements.get(0).select("td").first().text());
-    assertEquals(fname3, trElements.get(1).select("td").first().text());
+    assertEquals("Index of /", doc.getH1Text());
+    assertFalse(doc.hasUpLink());
+    assertEquals(List.of(fname1,fname3), doc.getFileNames());
     assertEquals(
-        Util.renderFileSize(file1.toFile().length()), trElements.get(0).select("td").get(1).text());
-    assertEquals(
-        Util.renderFileSize(file3.toFile().length()), trElements.get(1).select("td").get(1).text());
+        List.of(Util.renderFileSize(file1.toFile().length()),
+          Util.renderFileSize(file3.toFile().length())),
+        doc.getFileSizes());
   }
 
   @Test
@@ -231,26 +226,18 @@ class ListingTests {
 
   private void checkCorrectListingRoot(GivenForComplexFileSet given, Document document) {
     System.out.println(document);
+    DocumentAccessor doc = new DocumentAccessor(document);
 
-    Elements trElements = document.select("table tbody tr");
+    assertEquals("Index of /", doc.getH1Text());
+    assertFalse(doc.hasUpLink());
+    assertEquals(List.of(given.folderName1,given.folderName2,given.fname7),doc.getFileNames());
 
-    assertEquals("Index of /", getH1Text(document));
-    assertEquals(0, document.select("a.up").size());
-    assertEquals(3, trElements.size());
-    assertEquals(given.folderName1, trElements.get(0).select("td").first().text());
-    assertEquals(given.folderName2, trElements.get(1).select("td").first().text());
-    assertEquals("/?f=0&name=", trElements.get(0).select("td a").first().attr("href"));
-    assertEquals("/?f=1&name=", trElements.get(1).select("td a").first().attr("href"));
-    assertEquals(given.fname7, trElements.get(2).select("td").first().text());
-    assertEquals("", trElements.get(0).select("td").get(1).text());
-    assertEquals("", trElements.get(1).select("td").get(1).text());
+    Map<String, String> folderLinks = doc.getFolderLinks();
+    assertEquals("/?f=0&name=", folderLinks.get(given.folderName1));
+    assertEquals("/?f=1&name=", folderLinks.get(given.folderName2));
     assertEquals(
-        Util.renderFileSize(given.file7.toFile().length()),
-        trElements.get(2).select("td").get(1).text());
-  }
-
-  private String getH1Text(Document document) {
-    return document.select("h1").first().text().replace(" ↓ tar | ↓ tar.gz", "");
+        List.of("","",Util.renderFileSize(given.file7.toFile().length())),
+        doc.getFileSizes());
   }
 
   @Test
@@ -278,21 +265,18 @@ class ListingTests {
     // emulate click on a folder 'input_folder2' link
     String listingUrlNext = given.baseUrl + nextPage;
     Document document = Jsoup.connect(listingUrlNext).get();
+    DocumentAccessor doc = new DocumentAccessor(document);
 
     // THEN
     System.out.println(document);
 
-    Elements trElements = document.select("table tbody tr");
-
-    assertEquals("Index of /" + given.folderName2 + "/", getH1Text(document));
-    assertEquals(1, document.select("a.up").size());
-    assertEquals(3, trElements.size());
-    Element f0 = trElements.get(1);
-    Element f1 = trElements.get(2);
-    assertEquals(given.fname4, f0.select("td").first().text());
-    assertEquals(given.fname5, f1.select("td").first().text());
-    assertEquals(Util.renderFileSize(given.file4.toFile().length()), f0.select("td").get(1).text());
-    assertEquals(Util.renderFileSize(given.file5.toFile().length()), f1.select("td").get(1).text());
+    assertEquals("Index of /" + given.folderName2 + "/", doc.getH1Text());
+    assertTrue(doc.hasUpLink());
+    assertEquals(List.of(given.folderName3,given.fname4,given.fname5), doc.getFileNames());
+    assertEquals(List.of("",
+            Util.renderFileSize(given.file4.toFile().length()),
+            Util.renderFileSize(given.file5.toFile().length())),
+          doc.getFileSizes());
   }
 
   @Test

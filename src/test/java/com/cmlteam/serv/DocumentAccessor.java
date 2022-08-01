@@ -14,6 +14,29 @@ import java.util.stream.Collectors;
 public class DocumentAccessor {
     private final Document document;
 
+    boolean hasUpLink() {
+        return document.select("a.up").size() == 1;
+    }
+
+    String getUpLink() {
+        return document.select("a.up").first().attr("href");
+    }
+
+    String getTarLink() {
+        Elements topDlLinks = document.select("h1 a");
+        Element tarLink = topDlLinks.first();
+        return tarLink.attr("href");
+    }
+    String getTarGzLink() {
+        Elements topDlLinks = document.select("h1 a");
+        Element tarGzLink = topDlLinks.last();
+        return tarGzLink.attr("href");
+    }
+
+    String getH1Text() {
+        return document.select("h1").first().text().replace(" ↓ tar | ↓ tar.gz", "");
+    }
+
     int getFileCount() {
         Elements trElements = document.select("table tbody tr");
         return trElements.size();
@@ -22,6 +45,11 @@ public class DocumentAccessor {
     List<String> getFileNames() {
         Elements trElements = document.select("table tbody tr");
         return trElements.stream().map(element -> element.select("td").first().text()).collect(Collectors.toList());
+    }
+
+    List<String> getFileSizes() {
+        Elements trElements = document.select("table tbody tr");
+        return trElements.stream().map(element -> element.select("td").get(1).text()).collect(Collectors.toList());
     }
 
     Map<String,String> getFolderLinks() {

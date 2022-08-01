@@ -39,6 +39,7 @@ abstract class HttpHandlerBase implements HttpHandler {
 
   // TODO human sort
   static int compareFiles(File f1, File f2) {
+//    System.out.println("::: " + f1 + " ::: " + f1.getName());
     return f1.isFile() && f2.isDirectory()
         ? 1
         : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
