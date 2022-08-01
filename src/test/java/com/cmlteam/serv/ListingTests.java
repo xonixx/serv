@@ -92,7 +92,7 @@ class ListingTests {
     //    System.out.println(getUrlToString(listingUrl));
 
     Document document = Jsoup.connect(listingUrl).get();
-    System.out.println(document);
+//    System.out.println(document);
 
     Elements trElements = document.select("table tbody tr");
     String href = trElements.get(0).select("td a").first().attr("href");
@@ -102,13 +102,18 @@ class ListingTests {
 
     // WHEN
     Document document1 = Jsoup.connect(listingUrl1).get();
-    System.out.println(document1);
+//    System.out.println(document1);
     Element upLink1 = document1.select("a.up").first();
+    Elements topDlLinks = document1.select("h1 a");
+    Element tarLink = topDlLinks.first();
+    Element tarGzLink = topDlLinks.last();
 
     // THEN
     assertEquals("Index of /", getH1Text(document));
     assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
     assertEquals("/",upLink1.attr("href"));
+    assertEquals("/dlRef?name=folder2%2F",tarLink.attr("href"));
+    assertEquals("/dlRef?name=folder2%2F&z",tarGzLink.attr("href"));
   }
 
   @Test

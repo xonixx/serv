@@ -158,9 +158,9 @@ public class HttpHandlerListing extends HttpHandlerBase {
 
     if (!isRoot) {
       String dlParams = dlParams(fIdx, indexedFolder);
-      download = String.format("<a href='/dlRef?%s'>↓ tar</a> | ", dlParams);
+      download = String.format("<a href='/dlRef%s'>↓ tar</a> | ", dlParams);
       downloadZ =
-          String.format("<a href='/dlRef?%s&z'>↓ tar.gz</a>", dlParams);
+          String.format("<a href='/dlRef%s&z'>↓ tar.gz</a>", dlParams);
     } else {
       download = "<a href='/dl'>↓ tar</a> | ";
       downloadZ = "<a href='/dl?z'>↓ tar.gz</a>";
