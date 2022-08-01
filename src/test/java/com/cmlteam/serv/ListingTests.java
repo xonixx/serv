@@ -75,6 +75,26 @@ class ListingTests {
   }
 
   @Test
+  void shouldNotSeverOutsideTest(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    Path inputFolder = createTestFolder(tempDir, "input_folder");
+    String fname1 = "file1.txt";
+    Path file1 = createTestFile(inputFolder, fname1, "hello world 123");
+
+    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+
+    InetSocketAddress address = serv.getAddress();
+    //    System.out.println(getUrlToString(listingUrl));
+
+    // WHEN
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/?f=0&name=../../../../../../../../../";
+    TestsUtil.GetReply reply = TestsUtil.getUrl(listingUrl);
+
+    // THEN
+    assertEquals(404, reply.statusCode);
+  }
+
+  @Test
   void basicFolderListingCorrectTitle(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path folder1 = createTestFolder(tempDir, "folder1");
