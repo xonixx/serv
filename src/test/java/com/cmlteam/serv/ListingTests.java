@@ -187,6 +187,8 @@ class ListingTests {
     assertEquals(3, trElements.size());
     assertEquals(given.folderName1, trElements.get(0).select("td").first().text());
     assertEquals(given.folderName2, trElements.get(1).select("td").first().text());
+    assertEquals("/?f=0&name=", trElements.get(0).select("td a").first().attr("href"));
+    assertEquals("/?f=1&name=", trElements.get(1).select("td a").first().attr("href"));
     assertEquals(given.fname7, trElements.get(2).select("td").first().text());
     assertEquals("", trElements.get(0).select("td").get(1).text());
     assertEquals("", trElements.get(1).select("td").get(1).text());
