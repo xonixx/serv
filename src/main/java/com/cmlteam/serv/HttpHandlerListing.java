@@ -201,7 +201,8 @@ public class HttpHandlerListing extends HttpHandlerBase {
 
   private String dlParams(int fIdx, File file) {
     String relativePath = relativePath(fIdx, file);
-    return "?f=" + fIdx + "&name=" + URLEncoder.encode(relativePath, UTF_8);
+    return  fIdx == 0 && "".equals(relativePath) ? "" :
+            "?" + (fIdx == 0 ? "" : "f=" + fIdx + "&") + "name=" + URLEncoder.encode(relativePath, UTF_8);
   }
 
   private void writeStrings(OutputStream os, String[] content) throws IOException {

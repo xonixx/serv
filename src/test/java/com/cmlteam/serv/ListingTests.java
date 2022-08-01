@@ -108,7 +108,7 @@ class ListingTests {
     // THEN
     assertEquals("Index of /", getH1Text(document));
     assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
-    assertEquals("/?f=0&name=",upLink1.attr("href"));
+    assertEquals("/",upLink1.attr("href"));
   }
 
   @Test
