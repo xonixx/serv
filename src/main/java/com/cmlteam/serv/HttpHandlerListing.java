@@ -72,7 +72,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     filesList.sort(HttpHandlerListing::compareFiles);
 
     for (File file : filesList) {
-      int fIdxFixed = fIdx == -1 ? Arrays.asList(files).indexOf(file) : fIdx;
+      int fIdxFixed = fIdx == -1 ? filesList.indexOf(file) : fIdx;
 
       if (file.isDirectory()) {
         writeFolderRow(os, fIdxFixed, file);
@@ -155,7 +155,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
       throws IOException {
     boolean isRoot = indexedFolder == null;
     String indexedFolderDisplayed =
-        "/" + (isRoot ? "" : files[fIdx].getName() + "/" + relativePath(fIdx, indexedFolder));
+        "/" + (isRoot ? "" : (files.length > 1 ? files[fIdx].getName() + "/" : "") + relativePath(fIdx, indexedFolder));
 
     String parentUrl = "";
     if (!isRoot) {
