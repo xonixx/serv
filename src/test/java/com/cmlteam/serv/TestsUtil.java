@@ -61,7 +61,7 @@ final class TestsUtil {
   }
 
   private static String inputStreamToString(InputStream inputStream) {
-    try (Scanner scanner = new Scanner(inputStream, UTF_8.toString())) {
+    try (Scanner scanner = new Scanner(inputStream, UTF_8)) {
       scanner.useDelimiter("\\A");
       return scanner.hasNext() ? scanner.next() : "";
     }

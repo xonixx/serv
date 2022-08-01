@@ -14,19 +14,14 @@ class HttpHandlerServeFileByLink extends HttpHandlerBase {
 
   @Override
   public void doHandle(HttpExchange httpExchange) throws IOException {
-    FileRef ref = getRequestedFileRef(httpExchange.getRequestURI());
-
-    if (ref != null) {
-      File file = ref.resolve(files);
-      if (file != null) {
-        if (file.isFile()) {
-          new HttpHandlerServeFile(file).doHandle(httpExchange);
-        } else if (file.isDirectory()) {
-          new HttpHandlerServeFilesTar(file.getName(), file.listFiles(), true)
-              .doHandle(httpExchange);
-        } else {
-          HttpHandlerForStatus.NOT_FOUND.handle(httpExchange);
-        }
+    FileRef ref = FileRef.of(httpExchange.getRequestURI(), files);
+    File file = ref.resolve();
+    if (file != null) {
+      if (file.isFile()) {
+        new HttpHandlerServeFile(file).doHandle(httpExchange);
+      } else if (file.isDirectory()) {
+        new HttpHandlerServeFilesTar(file.getName(), file.listFiles(), true)
+            .doHandle(httpExchange);
       } else {
         HttpHandlerForStatus.NOT_FOUND.handle(httpExchange);
       }

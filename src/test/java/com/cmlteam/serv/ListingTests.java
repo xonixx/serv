@@ -9,6 +9,8 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -27,8 +29,9 @@ class ListingTests {
     serv.stop();
   }
 
-  @Test
-  void basicFolderListingTest(@TempDir Path tempDir) throws IOException {
+  @ParameterizedTest
+  @ValueSource(strings = {"", "?f=0&name="})
+  void basicFolderListingTest(String path, @TempDir Path tempDir) throws IOException {
     // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
@@ -45,7 +48,7 @@ class ListingTests {
 
     InetSocketAddress address = serv.getAddress();
 
-    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/";
+    String listingUrl = "http://" + address.getHostName() + ":" + address.getPort() + "/" + path;
 
     //    System.out.println(getUrlToString(listingUrl));
 
@@ -72,11 +75,13 @@ class ListingTests {
   }
 
   @Test
-  void basicFolderListingCorrectUpLinkTitle(@TempDir Path tempDir) throws IOException {
+  void basicFolderListingCorrectTitle(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path folder1 = createTestFolder(tempDir, "folder1");
+    Path file1 = createTestFile(folder1, "f1.txt", "abc");
+
     Path folder2 = createTestFolder(folder1, "folder2");
-    Path file = createTestFile(folder2, "f.txt", "abc");
+    Path file2 = createTestFile(folder2, "f2.txt", "abc");
 
     serv = new Serv(new String[] {"-p", testPort, folder1.toFile().getAbsolutePath()});
 
@@ -87,7 +92,6 @@ class ListingTests {
     //    System.out.println(getUrlToString(listingUrl));
 
     Document document = Jsoup.connect(listingUrl).get();
-
 //    System.out.println(document);
 
     Elements trElements = document.select("table tbody tr");
@@ -98,10 +102,18 @@ class ListingTests {
 
     // WHEN
     Document document1 = Jsoup.connect(listingUrl1).get();
+//    System.out.println(document1);
+    Element upLink1 = document1.select("a.up").first();
+    Elements topDlLinks = document1.select("h1 a");
+    Element tarLink = topDlLinks.first();
+    Element tarGzLink = topDlLinks.last();
 
     // THEN
     assertEquals("Index of /", getH1Text(document));
     assertEquals("Index of /" + folder2.getFileName() + "/", getH1Text(document1));
+    assertEquals("/",upLink1.attr("href"));
+    assertEquals("/dlRef?name=folder2%2F",tarLink.attr("href"));
+    assertEquals("/dlRef?name=folder2%2F&z",tarGzLink.attr("href"));
   }
 
   @Test
@@ -175,6 +187,8 @@ class ListingTests {
     assertEquals(3, trElements.size());
     assertEquals(given.folderName1, trElements.get(0).select("td").first().text());
     assertEquals(given.folderName2, trElements.get(1).select("td").first().text());
+    assertEquals("/?f=0&name=", trElements.get(0).select("td a").first().attr("href"));
+    assertEquals("/?f=1&name=", trElements.get(1).select("td a").first().attr("href"));
     assertEquals(given.fname7, trElements.get(2).select("td").first().text());
     assertEquals("", trElements.get(0).select("td").get(1).text());
     assertEquals("", trElements.get(1).select("td").get(1).text());

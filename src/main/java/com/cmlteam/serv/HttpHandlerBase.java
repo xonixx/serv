@@ -2,8 +2,10 @@ package com.cmlteam.serv;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.ToString;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +44,10 @@ abstract class HttpHandlerBase implements HttpHandler {
         : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
   }
 
+  static boolean isSingleFolder(File[] files) {
+    return files.length == 1 && files[0].isDirectory();
+  }
+
   File[] sortedFilesArray(File[] files) {
     List<File> fileList = Arrays.asList(files);
     fileList.sort(HttpHandlerListing::compareFiles);
@@ -49,15 +55,10 @@ abstract class HttpHandlerBase implements HttpHandler {
     return files;
   }
 
-  @SneakyThrows
-  static FileRef getRequestedFileRef(URI uri) {
-    QueryParser queryParser = new QueryParser(uri);
-    String name = queryParser.getParam("name");
-    return name == null ? null : new FileRef(Integer.parseInt(queryParser.getParam("f")), name);
-  }
-
   @RequiredArgsConstructor
+  @ToString
   static class FileRef {
+    static final int ROOT_IDX = -1;
     /**
      * The index of a file/folder in CLI args list, ex. `serv file1 dir2 dir3`.
      * In case of `serv dir` the files in dir are listed.
@@ -66,18 +67,34 @@ abstract class HttpHandlerBase implements HttpHandler {
     /**
      * The file path relative to dir set by `fIdx`
      */
-    final String name;
+    final String name; // TODO rename to path
+
+    final File[] files;
+
+    @SneakyThrows
+    @NonNull
+    static FileRef of(URI uri, File[] files) {
+      QueryParser queryParser = new QueryParser(uri);
+      String name = queryParser.getParam("name");
+      String f = queryParser.getParam("f");
+      return new FileRef(f == null ? (!"".equals(name) && name != null ? 0 : ROOT_IDX) : Integer.parseInt(f), name, files);
+    }
+
+    boolean isRoot() {
+      return ROOT_IDX == fIdx ||
+              ("".equals(name) || name == null) && isSingleFolder(files);
+    }
 
     /**
      * @return resolved file or null (if file path is invalid or outside the scope of shared
      *     folders)
      */
-    File resolve(File[] files) {
+    File resolve() {
       File file = new File(files[fIdx], name);
-      return isValidToAccess(files, file) ? file : null;
+      return isValidToAccess(file) ? file : null;
     }
 
-    private boolean isValidToAccess(File[] files, File file) {
+    private boolean isValidToAccess(File file) {
       Path pathToCheck = file.toPath();
       if (!Files.exists(pathToCheck)) {
         return false;
