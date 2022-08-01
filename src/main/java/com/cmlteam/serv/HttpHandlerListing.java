@@ -32,7 +32,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
     try (OutputStream os = httpExchange.getResponseBody()) {
       FileRef ref = FileRef.of(httpExchange.getRequestURI(),files);
       if (ref.isRoot()) {
-        if (files.length == 1 && files[0].isDirectory()) {
+        if (isSingleFolder(files)) {
           showList(httpExchange, 0, null, files[0].listFiles(), os);
         } else {
           showList(httpExchange, -1, null, files, os);
@@ -155,7 +155,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
       throws IOException {
     boolean isRoot = indexedFolder == null;
     String indexedFolderDisplayed =
-        "/" + (isRoot ? "" : (files.length > 1 ? files[fIdx].getName() + "/" : "") + relativePath(fIdx, indexedFolder));
+        "/" + (isRoot ? "" : (isSingleFolder(files) ? "" : files[fIdx].getName() + "/") + relativePath(fIdx, indexedFolder));
 
     String parentUrl = "";
     if (!isRoot) {

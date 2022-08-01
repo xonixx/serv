@@ -44,6 +44,10 @@ abstract class HttpHandlerBase implements HttpHandler {
         : f1.isDirectory() && f2.isFile() ? -1 : f1.getName().compareTo(f2.getName());
   }
 
+  static boolean isSingleFolder(File[] files) {
+    return files.length == 1 && files[0].isDirectory();
+  }
+
   File[] sortedFilesArray(File[] files) {
     List<File> fileList = Arrays.asList(files);
     fileList.sort(HttpHandlerListing::compareFiles);
@@ -78,7 +82,7 @@ abstract class HttpHandlerBase implements HttpHandler {
 
     boolean isRoot() {
       return ROOT_IDX == fIdx ||
-              ("".equals(name) || name == null) && files.length == 1 && files[0].isDirectory();
+              ("".equals(name) || name == null) && isSingleFolder(files);
     }
 
     /**
