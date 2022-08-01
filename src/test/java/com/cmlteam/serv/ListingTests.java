@@ -4,7 +4,6 @@ import com.cmlteam.util.Util;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -58,8 +57,6 @@ class ListingTests {
     DocumentAccessor doc = new DocumentAccessor(document);
     // THEN
 //    System.out.println(document);
-
-//    Elements trElements = document.select("table tbody tr");
 
     assertEquals("Index of /", doc.getH1Text());
     assertFalse(doc.hasUpLink());
@@ -197,8 +194,6 @@ class ListingTests {
     // THEN
     System.out.println(document);
 
-    Elements trElements = document.select("table tbody tr");
-
     assertEquals("Index of /", doc.getH1Text());
     assertFalse(doc.hasUpLink());
     assertEquals(List.of(fname1,fname3), doc.getFileNames());
@@ -251,15 +246,7 @@ class ListingTests {
 
     Document documentRoot = Jsoup.connect(listingUrl).get();
 
-    String nextPage =
-        documentRoot
-            .select("table tbody tr")
-            .get(1)
-            .select("td")
-            .first()
-            .select("a")
-            .first()
-            .attr("href");
+    String nextPage = new DocumentAccessor(documentRoot).getFolderLinks().get(given.folderName2);
 
     // WHEN
     // emulate click on a folder 'input_folder2' link
@@ -290,15 +277,7 @@ class ListingTests {
 
     Document documentRoot = Jsoup.connect(listingUrl).get();
 
-    String nextPage =
-        documentRoot
-            .select("table tbody tr")
-            .get(1)
-            .select("td")
-            .first()
-            .select("a")
-            .first()
-            .attr("href");
+    String nextPage = new DocumentAccessor(documentRoot).getFolderLinks().get(given.folderName2);;
 
     String listingUrlNext = given.baseUrl + nextPage;
 
