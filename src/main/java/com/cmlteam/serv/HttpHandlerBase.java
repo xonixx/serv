@@ -40,12 +40,8 @@ abstract class HttpHandlerBase implements HttpHandler {
   // TODO human sort
   static int compareFiles(File f1, File f2) {
     boolean f1File = f1.isFile();
-    boolean f1Dir = f1.isDirectory();
-    boolean f2File = f2.isFile();
-    boolean f2Dir = f2.isDirectory();
-    return  !f1File && !f1Dir ? 100 : // such as broken symlink
-            !f2File && !f2Dir ? -100 :
-            f1File && f2Dir ? 1 : f1Dir && f2File ? -1 : f1.getName().compareTo(f2.getName());
+    return  (f1File && f2.isFile() || f1.isDirectory() && f2.isDirectory()) ? f1.getName().compareTo(f2.getName())
+            : f1File ? 1 : -1;
   }
 
   static boolean isSingleFolder(File[] files) {
