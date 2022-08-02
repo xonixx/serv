@@ -2,21 +2,22 @@
 
 @options timing
 
-@define GRAAL=~/.sdkman/candidates/java/21.3.0.r17-grl
-#@define GRAAL=~/.sdkman/candidates/java/21.3.0.r11-grl
-@define UPX_HOME=~/soft/upx-3.95-amd64_linux
+# TODO ~
+@define GRAAL='/home/xonix/.sdkman/candidates/java/21.3.0.r17-grl'
+#@define GRAAL='/home/xonix/.sdkman/candidates/java/21.3.0.r11-grl'
+@define UPX_HOME='/home/xonix/soft/upx-3.95-amd64_linux'
 
-@goal build_folder_created
+@goal build_folder_created @private
 @reached_if [[ -d ./build ]]
   mkdir ./build
 
-@goal graal_native_installed
+@goal graal_native_installed @private
 @reached_if [[ -f $GRAAL/bin/native-image ]]
   echo "Installing native-image..."
   cd "$GRAAL/bin/"
   ./gu install native-image
 
-@goal javac
+@goal javac @private
   export JAVA_HOME="$GRAAL"
   graal_version=$($GRAAL/bin/java -version 2>&1 | grep '64' | grep GraalVM | sed -E 's#.+(GraalVM.+) \(.+#\1#')
   java_version=$($GRAAL/bin/java -version 2>&1 | head -n 1 | sed 's/ version//' | sed 's/"//g')
@@ -43,7 +44,7 @@
       -d target/classes \
       $tmp_src_dir/com/cmlteam/serv/Constants.java
 
-@goal built_native
+@goal built_native @private
 @depends_on build_folder_created graal_native_installed javac
   CP=$(mvn -q exec:exec -Dexec.executable=echo -Dexec.args="%classpath")
 
@@ -54,7 +55,7 @@
     -H:Log=registerResource:
   ls -lh ./com.cmlteam.serv.serv
 
-@goal upx
+@goal upx @private
   cd ./build/
 
   rm -f ./serv
