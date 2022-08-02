@@ -2,10 +2,10 @@
 
 @options timing
 
-# TODO ~
-@define GRAAL='/home/xonix/.sdkman/candidates/java/21.3.0.r17-grl'
-#@define GRAAL='/home/xonix/.sdkman/candidates/java/21.3.0.r11-grl'
-@define UPX_HOME='/home/xonix/soft/upx-3.95-amd64_linux'
+@define GRAAL="$HOME/.sdkman/candidates/java/21.3.0.r17-grl"
+#@define GRAAL="$HOME/.sdkman/candidates/java/22.2.r17-grl"
+#@define GRAAL="$HOME/.sdkman/candidates/java/21.3.0.r11-grl"
+@define UPX_HOME="$HOME/soft/upx-3.95-amd64_linux" # TODO via soft folder
 
 @goal build_folder_created @private
 @reached_if [[ -d ./build ]]
@@ -52,7 +52,7 @@
 
   $GRAAL/bin/native-image -cp "$CP" com.cmlteam.serv.Serv \
     -H:IncludeResources='.*ico$' \
-    -H:Log=registerResource:
+    -H:Log=registerResource: # --native-image-info --verbose
   ls -lh ./com.cmlteam.serv.serv
 
 @goal upx @private
