@@ -6,6 +6,10 @@ The simple tool to quickly share file or folder in local network.
 
 After running the tool it gives you the precise commands that you can pass to your teammate to receive the file(s).
 
+The tool also renders simple static server web-UI:
+
+![web-UI](img.png)
+
 ## Usage
 
 Sharing a file:
@@ -30,7 +34,7 @@ wget -O- http://192.168.0.179:17777/dl | tar -xvf -
 curl http://192.168.0.179:17777/dl?z | tar -xzvf -
 wget -O- http://192.168.0.179:17777/dl?z | tar -xzvf -
 
-Files listing: http://192.168.0.108:17777/
+Files listing: http://192.168.0.179:17777/
 ```
 
 Help message:
