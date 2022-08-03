@@ -1,6 +1,6 @@
 # serv
 
-![](https://github.com/xonixx/serv/workflows/Unit%20Tests/badge.svg?branch=master)
+[![Unit Tests](https://github.com/xonixx/serv/actions/workflows/run-tests.yml/badge.svg)](https://github.com/xonixx/serv/actions/workflows/run-tests.yml)
 
 The simple tool to quickly share file or folder in local network.
 
@@ -40,7 +40,7 @@ Files listing: http://192.168.0.179:17777/
 Help message:
 ```
 $ serv -h
-serv ver. 1.0.0
+serv ver. 1.0.1 (GraalVM CE 21.3.0, openjdk 17.0.1 2021-10-19)
 usage: serv [...options] <file or folder> [...<file or folder>]
  -H,--host <arg>    host to serve on (default is determined automatically)
  -h,--help          print help and exit
@@ -59,7 +59,7 @@ To install or update the tool simply run the command below.
 
 ```
 $ sudo bash -e -c "
-wget https://github.com/xonixx/serv/releases/download/v1.0.0/serv-linux-amd64 -O/usr/local/bin/serv
+wget https://github.com/xonixx/serv/releases/download/v1.0.1/serv-linux-amd64 -O/usr/local/bin/serv
 chmod +x /usr/local/bin/serv
 echo \"serv \$(serv -v) installed successfully\" 
 "
