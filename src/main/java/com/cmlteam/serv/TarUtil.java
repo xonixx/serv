@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 class TarUtil {
 
@@ -73,7 +74,7 @@ class TarUtil {
         }
       }
     } else {
-      System.out.println(file.getName() + " is not supported");
+      System.err.println("warning: not supported (symlink?): " + file);
     }
   }
 }
