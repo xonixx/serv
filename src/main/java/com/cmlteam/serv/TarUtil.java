@@ -3,7 +3,7 @@ package com.cmlteam.serv;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +48,11 @@ class TarUtil {
 
   private static void addToArchiveCompression(
       TarArchiveOutputStream out, File file, String dir, TarOptions tarOptions) throws IOException {
+
+    if (!file.canRead()) {
+      System.err.println("warning: can't read " + file);
+      return;
+    }
 
     if (tarOptions.shouldExclude(file)) {
       return;
