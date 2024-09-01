@@ -157,9 +157,10 @@ class SharingTests {
 
     // WHEN
     File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
-    getUrlToFile(
-        "http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""),
-        resultFile);
+    getUrlToFile("http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""), resultFile);
+
+//    System.out.println("resultFile: " + resultFile);
+//    System.out.println("    size=" + resultFile.length());
 
     // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");

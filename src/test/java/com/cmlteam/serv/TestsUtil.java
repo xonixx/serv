@@ -42,7 +42,7 @@ final class TestsUtil {
   }
 
   static void assertFilesEqual(File expectedFile, File resultFile) {
-    assertEquals(expectedFile.length(), resultFile.length(), "file size must be same");
+    assertEquals(expectedFile.length(), resultFile.length(), "file size must be same: " + expectedFile.getName() + " and " + resultFile.getName());
     assertThat(resultFile)
         .describedAs("files should have same content")
         .hasSameBinaryContentAs(expectedFile);

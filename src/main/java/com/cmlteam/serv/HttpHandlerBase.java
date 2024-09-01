@@ -107,8 +107,9 @@ abstract class HttpHandlerBase implements HttpHandler {
   public void handle(HttpExchange exchange) throws IOException {
     try {
       doHandle(exchange);
-    } catch (Exception ex) {
-      ex.printStackTrace();
+    } catch (Throwable t) {
+      System.err.println("Unhandled exception occurred:");
+      t.printStackTrace();
       HttpHandlerForStatus.SERVER_ERROR.doHandle(exchange);
     } finally {
       exchange.close();

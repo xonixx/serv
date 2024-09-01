@@ -69,3 +69,14 @@
 @goal default
 @depends_on built
 
+@goal runH
+@doc 'run help'
+  mvn compile exec:java -Dexec.mainClass="com.cmlteam.serv.Serv" -Dexec.args="-h"
+
+@goal run2
+@doc 'sample run 2 files'
+  mvn compile exec:java -Dexec.mainClass="com.cmlteam.serv.Serv" -Dexec.args="doc.txt img.png"
+
+@goal runF
+@doc 'sample run folder'
+  mvn compile exec:java -Dexec.mainClass="com.cmlteam.serv.Serv" -Dexec.args="."
