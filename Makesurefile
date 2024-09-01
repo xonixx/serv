@@ -2,10 +2,10 @@
 
 @options timing
 
-#@define GRAAL="$HOME/.sdkman/candidates/java/21.3.0.r17-grl"
-@define GRAAL="$HOME/.sdkman/candidates/java/22.2.r17-grl"
-#@define GRAAL="$HOME/.sdkman/candidates/java/21.3.0.r11-grl"
-@define UPX_HOME="$HOME/soft/upx-3.95-amd64_linux" # TODO via soft folder
+#@define GRAAL "$HOME/.sdkman/candidates/java/21.3.0.r17-grl"
+@define GRAAL "$HOME/.sdkman/candidates/java/22.2.r17-grl"
+#@define GRAAL "$HOME/.sdkman/candidates/java/21.3.0.r11-grl"
+@define UPX_HOME "$HOME/soft/upx-3.95-amd64_linux" # TODO via soft folder
 
 @goal build_folder_created @private
 @reached_if [[ -d ./build ]]
