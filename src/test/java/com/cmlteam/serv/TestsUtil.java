@@ -42,7 +42,7 @@ final class TestsUtil {
   }
 
   static void assertFilesEqual(File expectedFile, File resultFile) {
-    assertEquals(expectedFile.length(), resultFile.length(), "file size must be same: " + expectedFile.getName() + " and " + resultFile.getName());
+    assertEquals(expectedFile.length(), resultFile.length(), "file size must be the same: " + expectedFile.getName() + " and " + resultFile.getName());
     assertThat(resultFile)
         .describedAs("files should have same content")
         .hasSameBinaryContentAs(expectedFile);
@@ -51,9 +51,9 @@ final class TestsUtil {
   static void getUrlToFile(String url, File resultFile) throws IOException {
     ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(url).openStream());
 
-    FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
-
-    fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+    try (FileOutputStream fileOutputStream = new FileOutputStream(resultFile)) {
+      fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+    }
   }
 
   static String getUrlToString(String url) throws IOException {
@@ -91,6 +91,26 @@ final class TestsUtil {
       if (connection != null) {
         connection.disconnect();
       }
+    }
+  }
+
+  static int exec(String... cmd) {
+    try {
+      Process process = Runtime.getRuntime().exec(cmd);
+      int exitCode = process.waitFor();
+      java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
+      String result = s.hasNext() ? s.next() : "";
+      if (!result.isEmpty()) {
+        System.out.println(result);
+      }
+      s = new java.util.Scanner(process.getErrorStream()).useDelimiter("\\A");
+      result = s.hasNext() ? s.next() : "";
+      if (!result.isEmpty()) {
+        System.err.println(result);
+      }
+      return exitCode;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
