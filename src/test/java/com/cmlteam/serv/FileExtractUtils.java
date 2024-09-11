@@ -19,7 +19,7 @@ public class FileExtractUtils {
     try (InputStream inputStream = _inputStream;
         TarArchiveInputStream tarIs = new TarArchiveInputStream(inputStream)) {
       TarArchiveEntry entry;
-      while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
+      while ((entry = tarIs.getNextEntry()) != null) {
         String name = entry.getName();
         if (entry.isDirectory()) {
           mkDirs(outDir, name);

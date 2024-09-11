@@ -185,6 +185,7 @@ class SharingTests {
     Path file1 = createTestFile(inputFolder, fname1, "#!/bin/sh\necho 123\n");
 
     assertEquals(0, TestsUtil.exec("chmod", "+x", file1.toFile().getAbsolutePath()));
+    assertEquals(0, TestsUtil.exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
 //    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
 
     serv =
@@ -211,6 +212,7 @@ class SharingTests {
 
     Path file1Res = resultExtractedFolder.resolve(fname1);
     assertFilesEqual(file1, file1Res);
+    assertEquals(0, TestsUtil.exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
     assertEquals(0, TestsUtil.exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
     assertEquals(0, TestsUtil.exec(file1Res.toFile().getAbsolutePath())); // is still executable
   }

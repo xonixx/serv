@@ -1,15 +1,17 @@
 package com.cmlteam.serv;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.io.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.io.IOUtils;
 
 class TarUtil {
 
@@ -61,7 +63,9 @@ class TarUtil {
 
     String entry = dir + File.separator + file.getName();
     if (file.isFile()) {
-      out.putArchiveEntry(new TarArchiveEntry(file, entry));
+      TarArchiveEntry archiveEntry = new TarArchiveEntry(file, entry);
+      archiveEntry.setMode(calcPermissions(file));
+      out.putArchiveEntry(archiveEntry);
       try (FileInputStream in = new FileInputStream(file)) {
         IOUtils.copy(in, out);
       }
@@ -76,5 +80,31 @@ class TarUtil {
     } else {
       System.err.println("warning: not supported (symlink?): " + file);
     }
+  }
+
+  private static final Map<PosixFilePermission, Integer> permToShift =
+      Map.ofEntries(
+          Map.entry(PosixFilePermission.OWNER_READ, 8),
+          Map.entry(PosixFilePermission.OWNER_WRITE, 7),
+          Map.entry(PosixFilePermission.OWNER_EXECUTE, 6),
+          Map.entry(PosixFilePermission.GROUP_READ, 5),
+          Map.entry(PosixFilePermission.GROUP_WRITE, 4),
+          Map.entry(PosixFilePermission.GROUP_EXECUTE, 3),
+          Map.entry(PosixFilePermission.OTHERS_READ, 2),
+          Map.entry(PosixFilePermission.OTHERS_WRITE, 1),
+          Map.entry(PosixFilePermission.OTHERS_EXECUTE, 0));
+
+  static int calcPermissions(File file) throws IOException {
+    Set<String> availableAttributeViews =
+        file.toPath().getFileSystem().supportedFileAttributeViews();
+    int res = TarArchiveEntry.DEFAULT_FILE_MODE;
+    if (availableAttributeViews.contains("posix")) {
+      Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(file.toPath());
+      res = 0100000;
+      for (PosixFilePermission permission : permissions) {
+        res |= 1 << permToShift.get(permission);
+      }
+    }
+    return res;
   }
 }
