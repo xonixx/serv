@@ -1,9 +1,8 @@
 package com.cmlteam.serv;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static com.cmlteam.serv.TestsUtil.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -12,10 +11,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
-import static com.cmlteam.serv.TestsUtil.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class SharingTests {
   private static final String testPort = "18888";
@@ -155,10 +156,12 @@ class SharingTests {
 
     // WHEN
     File resultFile = tempDir.resolve("input_folder_result.tar" + (isGz ? ".gz" : "")).toFile();
-    getUrlToFile("http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""), resultFile);
+    getUrlToFile(
+        "http://" + address.getHostName() + ":" + address.getPort() + "/dl" + (isGz ? "?z" : ""),
+        resultFile);
 
-//    System.out.println("resultFile: " + resultFile);
-//    System.out.println("    size=" + resultFile.length());
+    //    System.out.println("resultFile: " + resultFile);
+    //    System.out.println("    size=" + resultFile.length());
 
     // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
@@ -174,7 +177,8 @@ class SharingTests {
   }
 
   @Test
-  void testPreserveScriptsPermissions_extractViaTar_issue48(@TempDir Path tempDir) throws IOException {
+  void testPreserveScriptsPermissions_extractViaTar_issue48(@TempDir Path tempDir)
+      throws IOException {
     // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
 
@@ -182,15 +186,24 @@ class SharingTests {
 
     Path file1 = createTestFile(inputFolder, fname1, "#!/bin/sh\necho 123\n");
 
-    assertEquals(0, TestsUtil.exec("chmod", "+x", file1.toFile().getAbsolutePath()));
-    assertEquals(0, TestsUtil.exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
-//    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
+    assertEquals(0, exec("chmod", "+x", file1.toFile().getAbsolutePath()));
+    assertEquals(0, exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
+    //    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
 
-    serv =
-        new Serv(
-            "-p",
-            testPort,
-            inputFolder.toFile().getAbsolutePath());
+    Command command = Command.fromArgs("-p", testPort, inputFolder.toFile().getAbsolutePath());
+    String helpString = command.getHelpString();
+    String[] lines = helpString.split("[\r\n]+");
+    String cmdTar = "";
+    for (String line : lines) {
+      if (line.contains(" tar ")) {
+        cmdTar = line;
+        break;
+      }
+    }
+//    System.out.println(helpString);
+//    System.out.println("cmdTar: " + cmdTar);
+
+    serv = new Serv(command);
 
     InetSocketAddress address = serv.getAddress();
 
@@ -204,15 +217,14 @@ class SharingTests {
     // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
 
-//    FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
-
+    assertEquals(0, system("cd '" + resultExtractedFolder.toFile().getAbsolutePath() + "'; " + cmdTar));
 
 
     Path file1Res = resultExtractedFolder.resolve(fname1);
     assertFilesEqual(file1, file1Res);
-    assertEquals(0, TestsUtil.exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
-    assertEquals(0, TestsUtil.exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
-    assertEquals(0, TestsUtil.exec(file1Res.toFile().getAbsolutePath())); // is still executable
+    assertEquals(0, exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
+    assertEquals(0, exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
+    assertEquals(0, exec(file1Res.toFile().getAbsolutePath())); // is still executable
   }
 
   @Test
@@ -224,15 +236,11 @@ class SharingTests {
 
     Path file1 = createTestFile(inputFolder, fname1, "#!/bin/sh\necho 123\n");
 
-    assertEquals(0, TestsUtil.exec("chmod", "+x", file1.toFile().getAbsolutePath()));
-    assertEquals(0, TestsUtil.exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
-//    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
+    assertEquals(0, exec("chmod", "+x", file1.toFile().getAbsolutePath()));
+    assertEquals(0, exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
+    //    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
 
-    serv =
-        new Serv(
-            "-p",
-            testPort,
-            inputFolder.toFile().getAbsolutePath());
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -250,8 +258,8 @@ class SharingTests {
 
     Path file1Res = resultExtractedFolder.resolve(fname1);
     assertFilesEqual(file1, file1Res);
-    assertEquals(0, TestsUtil.exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
-    assertEquals(0, TestsUtil.exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
-    assertEquals(0, TestsUtil.exec(file1Res.toFile().getAbsolutePath())); // is still executable
+    assertEquals(0, exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
+    assertEquals(0, exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
+    assertEquals(0, exec(file1Res.toFile().getAbsolutePath())); // is still executable
   }
 }

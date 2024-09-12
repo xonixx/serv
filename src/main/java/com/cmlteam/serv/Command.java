@@ -20,7 +20,7 @@ public class Command {
 
   private static final HelpMessageGenerator helpMessageGenerator = new HelpMessageGenerator();
 
-  static Command fromArgs(String[] args) {
+  static Command fromArgs(String... args) {
     Options options = new Options();
 
     Option host =
