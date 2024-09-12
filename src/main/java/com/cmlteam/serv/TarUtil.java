@@ -1,11 +1,14 @@
 package com.cmlteam.serv;
 
+import static java.nio.file.attribute.PosixFilePermission.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -84,15 +87,25 @@ class TarUtil {
 
   private static final Map<PosixFilePermission, Integer> permToShift =
       Map.ofEntries(
-          Map.entry(PosixFilePermission.OWNER_READ, 8),
-          Map.entry(PosixFilePermission.OWNER_WRITE, 7),
-          Map.entry(PosixFilePermission.OWNER_EXECUTE, 6),
-          Map.entry(PosixFilePermission.GROUP_READ, 5),
-          Map.entry(PosixFilePermission.GROUP_WRITE, 4),
-          Map.entry(PosixFilePermission.GROUP_EXECUTE, 3),
-          Map.entry(PosixFilePermission.OTHERS_READ, 2),
-          Map.entry(PosixFilePermission.OTHERS_WRITE, 1),
-          Map.entry(PosixFilePermission.OTHERS_EXECUTE, 0));
+          Map.entry(OWNER_READ, 8),
+          Map.entry(OWNER_WRITE, 7),
+          Map.entry(OWNER_EXECUTE, 6),
+          Map.entry(GROUP_READ, 5),
+          Map.entry(GROUP_WRITE, 4),
+          Map.entry(GROUP_EXECUTE, 3),
+          Map.entry(OTHERS_READ, 2),
+          Map.entry(OTHERS_WRITE, 1),
+          Map.entry(OTHERS_EXECUTE, 0));
+
+  static Set<PosixFilePermission> modeToPermissions(int mode) {
+    Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+    for (Map.Entry<PosixFilePermission, Integer> permEntry : permToShift.entrySet()) {
+      if ((mode & (1 << permEntry.getValue())) > 0) {
+        perms.add(permEntry.getKey());
+      }
+    }
+    return perms;
+  }
 
   static int calcPermissions(File file) throws IOException {
     Set<String> availableAttributeViews =
