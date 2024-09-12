@@ -113,4 +113,8 @@ final class TestsUtil {
       throw new RuntimeException(e);
     }
   }
+
+  static int system(String code) {
+    return exec("/bin/sh", "-c", code);
+  }
 }

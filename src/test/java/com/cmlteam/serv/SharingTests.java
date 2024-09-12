@@ -32,7 +32,7 @@ class SharingTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFile.getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -50,7 +50,7 @@ class SharingTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFile.getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -94,7 +94,7 @@ class SharingTests {
     Path file3 =
         createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
 
-    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -145,13 +145,11 @@ class SharingTests {
 
     serv =
         new Serv(
-            new String[] {
-              "-p",
-              testPort,
-              file1.toFile().getAbsolutePath(),
-              file2.toFile().getAbsolutePath(),
-              file3.toFile().getAbsolutePath()
-            });
+            "-p",
+            testPort,
+            file1.toFile().getAbsolutePath(),
+            file2.toFile().getAbsolutePath(),
+            file3.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -176,6 +174,48 @@ class SharingTests {
   }
 
   @Test
+  void testPreserveScriptsPermissions_extractViaTar_issue48(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    Path inputFolder = createTestFolder(tempDir, "input_folder");
+
+    String fname1 = "script.sh";
+
+    Path file1 = createTestFile(inputFolder, fname1, "#!/bin/sh\necho 123\n");
+
+    assertEquals(0, TestsUtil.exec("chmod", "+x", file1.toFile().getAbsolutePath()));
+    assertEquals(0, TestsUtil.exec("ls", "-l", file1.toFile().getAbsolutePath())); // show perms
+//    assertEquals(0, TestsUtil.exec(file1.toFile().getAbsolutePath()));
+
+    serv =
+        new Serv(
+            "-p",
+            testPort,
+            inputFolder.toFile().getAbsolutePath());
+
+    InetSocketAddress address = serv.getAddress();
+
+    // WHEN
+    File resultFile = tempDir.resolve("input_folder_result.tar").toFile();
+    getUrlToFile("http://" + address.getHostName() + ":" + address.getPort() + "/dl", resultFile);
+
+    System.out.println("resultFile: " + resultFile);
+    System.out.println("    size=" + resultFile.length());
+
+    // THEN
+    Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
+
+//    FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
+
+
+
+    Path file1Res = resultExtractedFolder.resolve(fname1);
+    assertFilesEqual(file1, file1Res);
+    assertEquals(0, TestsUtil.exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
+    assertEquals(0, TestsUtil.exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
+    assertEquals(0, TestsUtil.exec(file1Res.toFile().getAbsolutePath())); // is still executable
+  }
+
+  @Test
   void testPreserveScriptsPermissions_issue48(@TempDir Path tempDir) throws IOException {
     // GIVEN
     Path inputFolder = createTestFolder(tempDir, "input_folder");
@@ -190,11 +230,9 @@ class SharingTests {
 
     serv =
         new Serv(
-            new String[] {
-              "-p",
-              testPort,
-              inputFolder.toFile().getAbsolutePath()
-            });
+            "-p",
+            testPort,
+            inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 

@@ -44,7 +44,7 @@ class ListingTests {
     Path file3 =
         createTestFile(inputFolder, fname3, "123\n456\n789000000000000000000000000000000000");
 
-    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -88,7 +88,7 @@ class ListingTests {
       createTestFile(folder, f, "");
     }
 
-    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -109,7 +109,7 @@ class ListingTests {
     String fname1 = "file1.txt";
     Path file1 = createTestFile(inputFolder, fname1, "hello world 123");
 
-    serv = new Serv(new String[] {"-p", testPort, inputFolder.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
     //    System.out.println(getUrlToString(listingUrl));
@@ -131,7 +131,7 @@ class ListingTests {
     Path folder2 = createTestFolder(folder1, "folder2");
     Path file2 = createTestFile(folder2, "f2.txt", "abc");
 
-    serv = new Serv(new String[] {"-p", testPort, folder1.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, folder1.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -177,9 +177,7 @@ class ListingTests {
 
     serv =
         new Serv(
-            new String[] {
-              "-p", testPort, file1.toFile().getAbsolutePath(), file3.toFile().getAbsolutePath()
-            });
+            "-p", testPort, file1.toFile().getAbsolutePath(), file3.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -410,13 +408,11 @@ class ListingTests {
 
       Serv serv =
           new Serv(
-              new String[] {
-                "-p",
-                testPort,
-                inputFolder1.toFile().getAbsolutePath(),
-                inputFolder2.toFile().getAbsolutePath(),
-                file7.toFile().getAbsolutePath()
-              });
+              "-p",
+              testPort,
+              inputFolder1.toFile().getAbsolutePath(),
+              inputFolder2.toFile().getAbsolutePath(),
+              file7.toFile().getAbsolutePath());
       listingTests.serv = serv;
       InetSocketAddress address = serv.getAddress();
 
