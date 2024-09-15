@@ -84,7 +84,7 @@ class BasicUrlsTests {
     Path file = createTestFile(tempDir, "file.txt", "hello world 123");
 
     File inputFile = file.toFile();
-    serv = new Serv(new String[] {"-p", testPort, inputFile.getAbsolutePath()});
+    serv = new Serv("-p", testPort, inputFile.getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 
@@ -96,7 +96,7 @@ class BasicUrlsTests {
     Path file1 = createTestFile(folder, "file.txt", "hello world 123");
     Path file2 = createTestFile(folder, "file.html", "<h1>hello");
 
-    serv = new Serv(new String[] {"-p", testPort, folder.toFile().getAbsolutePath()});
+    serv = new Serv("-p", testPort, folder.toFile().getAbsolutePath());
 
     InetSocketAddress address = serv.getAddress();
 

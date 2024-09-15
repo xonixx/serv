@@ -1,11 +1,13 @@
 package com.cmlteam.serv;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Set;
 import lombok.SneakyThrows;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-
-import java.io.*;
 
 public class FileExtractUtils {
   private static final int BUFFER_SIZE = 4096;
@@ -19,7 +21,7 @@ public class FileExtractUtils {
     try (InputStream inputStream = _inputStream;
         TarArchiveInputStream tarIs = new TarArchiveInputStream(inputStream)) {
       TarArchiveEntry entry;
-      while ((entry = (TarArchiveEntry) tarIs.getNextEntry()) != null) {
+      while ((entry = tarIs.getNextEntry()) != null) {
         String name = entry.getName();
         if (entry.isDirectory()) {
           mkDirs(outDir, name);
@@ -28,22 +30,28 @@ public class FileExtractUtils {
           if (dir != null) {
             mkDirs(outDir, dir);
           }
-          extractFile(tarIs, outDir, name);
+          extractFile(tarIs, outDir, name, TarUtil.modeToPermissions(entry.getMode()));
         }
       }
     }
   }
 
-  private static void extractFile(InputStream inputStream, File outDir, String name)
+  private static void extractFile(
+      InputStream inputStream,
+      File outDir,
+      String name,
+      Set<PosixFilePermission> posixFilePermissions)
       throws IOException {
     int count;
     byte[] buffer = new byte[BUFFER_SIZE];
-    BufferedOutputStream out =
-        new BufferedOutputStream(new FileOutputStream(new File(outDir, name)), BUFFER_SIZE);
-    while ((count = inputStream.read(buffer, 0, BUFFER_SIZE)) != -1) {
-      out.write(buffer, 0, count);
+    File file = new File(outDir, name);
+    try (BufferedOutputStream out =
+        new BufferedOutputStream(new FileOutputStream(file), BUFFER_SIZE)) {
+      while ((count = inputStream.read(buffer, 0, BUFFER_SIZE)) != -1) {
+        out.write(buffer, 0, count);
+      }
     }
-    out.close();
+    Files.setPosixFilePermissions(file.toPath(), posixFilePermissions);
   }
 
   private static void mkDirs(File outdir, String path) {
