@@ -1,8 +1,7 @@
 package com.cmlteam.serv;
 
 import static com.cmlteam.serv.TestsUtil.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -261,5 +260,47 @@ class SharingTests {
     assertEquals(0, exec("tar", "-tvf", resultFile.getAbsolutePath())); // show perms in tar
     assertEquals(0, exec("ls", "-l", file1Res.toFile().getAbsolutePath())); // show perms
     assertEquals(0, exec(file1Res.toFile().getAbsolutePath())); // is still executable
+  }
+
+  @Test
+  void testHandleSymlinks_issue45(@TempDir Path tempDir) throws IOException {
+    // GIVEN
+    Path inputFolder = createTestFolder(tempDir, "input_folder");
+
+    String fname1 = "test.txt";
+    String symLinkName = "test.lnk";
+
+    Path file1 = createTestFile(inputFolder, fname1, "123");
+    Path symLink = inputFolder.resolve(symLinkName);
+    Files.createSymbolicLink(symLink, Path.of("./",fname1));
+
+    assertEquals(0, exec("ls", "-l", inputFolder.toFile().getAbsolutePath())); // show symlink
+    
+
+    serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
+
+    InetSocketAddress address = serv.getAddress();
+
+    // WHEN
+    File resultFile = tempDir.resolve("input_folder_result.tar").toFile();
+    getUrlToFile("http://" + address.getHostName() + ":" + address.getPort() + "/dl", resultFile);
+
+    System.out.println("resultFile: " + resultFile);
+    System.out.println("    size=" + resultFile.length());
+
+    // THEN
+    Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
+
+    FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
+
+    Path file1Res = resultExtractedFolder.resolve(fname1);
+
+    assertFilesEqual(file1, file1Res);
+    assertEquals(0, exec("ls", "-l", resultExtractedFolder.toFile().getAbsolutePath())); // show extracted files
+
+    Path symLinkRes = resultExtractedFolder.resolve(symLinkName);
+
+    assertTrue(Files.isSymbolicLink(symLinkRes));
+    assertEquals(file1Res.toAbsolutePath(), Files.readSymbolicLink(symLinkRes).toAbsolutePath());
   }
 }
