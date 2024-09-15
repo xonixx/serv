@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.regex.Pattern;
-
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -275,7 +273,7 @@ class SharingTests {
     Files.createSymbolicLink(symLink, Path.of("./",fname1));
 
     assertEquals(0, exec("ls", "-l", inputFolder.toFile().getAbsolutePath())); // show symlink
-    
+
 
     serv = new Serv("-p", testPort, inputFolder.toFile().getAbsolutePath());
 
@@ -291,16 +289,26 @@ class SharingTests {
     // THEN
     Path resultExtractedFolder = createTestFolder(tempDir, "result_folder");
 
-    FileExtractUtils.extractTarOrTgz(resultFile, resultExtractedFolder.toFile());
+    assertEquals(
+        0,
+        exec(
+            "tar",
+            "-C",
+            resultExtractedFolder.toAbsolutePath().toString(),
+            "-xvf",
+            resultFile.getAbsolutePath()));
 
     Path file1Res = resultExtractedFolder.resolve(fname1);
 
     assertFilesEqual(file1, file1Res);
+    System.out.println("tar content:");
+    assertEquals(0, exec("tar", "-tvf", resultFile.getAbsolutePath())); // show tar content
+    System.out.println("dir listing:");
     assertEquals(0, exec("ls", "-l", resultExtractedFolder.toFile().getAbsolutePath())); // show extracted files
 
     Path symLinkRes = resultExtractedFolder.resolve(symLinkName);
 
     assertTrue(Files.isSymbolicLink(symLinkRes));
-    assertEquals(file1Res.toAbsolutePath(), Files.readSymbolicLink(symLinkRes).toAbsolutePath());
+    assertTrue(Files.isSameFile(file1Res, resultExtractedFolder.resolve(Files.readSymbolicLink(symLinkRes))));
   }
 }

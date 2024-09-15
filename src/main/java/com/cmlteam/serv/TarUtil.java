@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 
@@ -65,7 +66,13 @@ class TarUtil {
     }
 
     String entry = dir + File.separator + file.getName();
-    if (file.isFile()) {
+    if (Files.isSymbolicLink(file.toPath())) {
+      TarArchiveEntry archiveEntry = new TarArchiveEntry(entry, TarConstants.LF_SYMLINK);
+      archiveEntry.setLinkName(Files.readSymbolicLink(file.toPath()).toString());
+      archiveEntry.setMode(calcPermissions(file));
+      out.putArchiveEntry(archiveEntry);
+      out.closeArchiveEntry();
+    } else if (file.isFile()) {
       TarArchiveEntry archiveEntry = new TarArchiveEntry(file, entry);
       archiveEntry.setMode(calcPermissions(file));
       out.putArchiveEntry(archiveEntry);
@@ -81,7 +88,8 @@ class TarUtil {
         }
       }
     } else {
-      System.err.println("warning: not supported (symlink?): " + file);
+      // TODO this could be due to absent permission
+      System.err.println("warning: not supported: " + file);
     }
   }
 
