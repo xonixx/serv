@@ -79,7 +79,7 @@ public class HttpHandlerListing extends HttpHandlerBase {
       } else if (file.isFile()) {
         writeFileRow(os, fIdxFixed, file);
       } else {
-        System.err.println("warning: not supported (symlink?): " + file);
+        System.err.println("warning: not supported: " + file);
       }
     }
     writeFooter(os);

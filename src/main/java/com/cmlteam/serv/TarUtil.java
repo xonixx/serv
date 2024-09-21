@@ -88,7 +88,6 @@ class TarUtil {
         }
       }
     } else {
-      // TODO this could be due to absent permission
       System.err.println("warning: not supported: " + file);
     }
   }
