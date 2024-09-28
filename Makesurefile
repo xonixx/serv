@@ -62,6 +62,7 @@
   rm -f ./serv
   $UPX_HOME/upx ./com.cmlteam.serv.serv -oserv
   ls -lh ./serv
+  ./serv --version
 
 @goal built
 @depends_on built_native upx
